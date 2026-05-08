@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>연금저축 갈아타기 분석 시뮬레이터</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 기본 폰트 및 스크롤바 스타일링 */
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; color: #334155; }
+        
+        /* * Chart Container Styling (CRITICAL REQUIREMENT)
+         * 이 컨테이너는 차트의 크기를 엄격하게 제한하고 반응형 레이아웃을 유지합니다.
+         */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* 모바일 기본 높이 */
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px; /* 데스크탑/태블릿 높이 */
+            }
+        }
+
+        /* 테이블 스크롤바 디자인 */
+        .custom-scrollbar::-webkit-scrollbar { height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="antialiased">
+
+<!-- Chosen Palette: Slate & Emerald/Sky (신뢰감, 금융, 긍정적 성장) -->
+<!-- Application Structure Plan: 
+     이 단일 페이지 애플리케이션은 사용자가 자신의 연금 상태를 입력하고 즉각적인 피드백을 받을 수 있는 대시보드 형태로 설계되었습니다.
+     1. 좌측/상단 제어 패널: 사용자 친화적인 단위(만원)로 필수 입력값을 수집합니다.
+     2. 우측/하단 결과 패널:
+        - 요약 카드: 최종 예상 환급금과 누적액 등 가장 중요한 핵심 지표를 강조합니다.
+        - 시각화(차트): 시간에 따른 누적 적립액과 해약 환급금의 성장 추이를 비교하여 보여줍니다.
+        - 상세 데이터(테이블): 연도별 세부 계산 내역을 투명하게 제공하여 사용자의 의사결정(유지 vs 해지)을 돕습니다.
+     이 구조는 '입력 -> 시각적 요약 -> 상세 분석'의 논리적 흐름을 따릅니다. -->
+<!-- Visualization & Content Choices: 
+     - Goal: 누적 성장과 페널티 비교 -> Viz: Line Chart (Chart.js) -> Interaction: Hover tooltips for exact values.
+     - Goal: 세부 수치 확인 -> Viz: Data Table (HTML/Tailwind) -> Interaction: Scrollable on mobile.
+     - Goal: 핵심 지표 강조 -> Viz: Summary Cards (HTML/Tailwind) -> Interaction: Dynamic updates based on input.
+     CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">💰</span>
+                <h1 class="text-xl font-bold text-slate-800">연금 갈아타기 분석기</h1>
+            </div>
+            <div class="text-sm text-slate-500 hidden sm:block">
+                중도 해지 세금 및 예상 환급금 시뮬레이션
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Column: Input Form -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="mb-6">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <span>📝</span> 나의 연금 정보 입력
+                    </h2>
+                    <p class="text-sm text-slate-500 mt-1">현재 상태와 향후 계획을 만원 단위로 입력해주세요.</p>
+                </div>
+
+                <form id="calcForm" class="space-y-4">
+                    <div>
+                        <label for="currentAmount" class="block text-sm font-medium text-slate-700 mb-1">현재 적립액</label>
+                        <div class="relative">
+                            <input type="number" id="currentAmount" value="1750" class="block w-full pl-3 pr-12 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-slate-500 sm:text-sm">만원</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="pastDeduction" class="block text-sm font-medium text-slate-700 mb-1">현재까지 받은 연금공제액(원금)</label>
+                        <div class="relative">
+                            <input type="number" id="pastDeduction" value="1500" class="block w-full pl-3 pr-12 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-slate-500 sm:text-sm">만원</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">과거 연말정산 시 세액공제 혜택을 받은 납입 원금 합계</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="monthlyPmt" class="block text-sm font-medium text-slate-700 mb-1">매월 납입금액</label>
+                            <div class="relative">
+                                <input type="number" id="monthlyPmt" value="10" class="block w-full pl-3 pr-12 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-slate-500 sm:text-sm">만원</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="years" class="block text-sm font-medium text-slate-700 mb-1">추가 납입 기간</label>
+                            <div class="relative">
+                                <input type="number" id="years" value="10" class="block w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-slate-500 sm:text-sm">년</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="rate" class="block text-sm font-medium text-slate-700 mb-1">예상 연 복리 수익률</label>
+                        <div class="relative">
+                            <input type="number" id="rate" value="2.0" step="0.1" class="block w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-slate-500 sm:text-sm">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg shadow transition-colors flex justify-center items-center gap-2">
+                            <span>🚀</span> 시뮬레이션 결과 보기
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="bg-slate-100 rounded-xl p-4 text-sm text-slate-600 border border-slate-200">
+                <p class="font-semibold text-slate-700 mb-1">ℹ️ 계산 기준 안내</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>연금저축 해약 시 기타소득세 <strong>16.5%</strong>가 부과됩니다.</li>
+                    <li>과세 대상: 세액공제 받은 원금 + 전체 이자수익</li>
+                    <li>세액공제 한도는 연 <strong>600만원</strong>으로 가정했습니다.</li>
+                    <li>본 결과는 단순 시뮬레이션이며 실제 금융기관 결과와 다를 수 있습니다.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Right Column: Dashboard -->
+        <div class="lg:col-span-8 space-y-6">
+            
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 border-l-4 border-l-sky-500">
+                    <p class="text-sm font-medium text-slate-500 mb-1">최종 누적 적립액</p>
+                    <div class="flex items-baseline gap-1">
+                        <h3 class="text-2xl font-bold text-slate-800" id="sumTotalAmount">0</h3>
+                        <span class="text-slate-500 font-medium">만원</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 border-l-4 border-l-red-400">
+                    <p class="text-sm font-medium text-slate-500 mb-1">중도 해약 시 예상 세금</p>
+                    <div class="flex items-baseline gap-1">
+                        <h3 class="text-2xl font-bold text-slate-800" id="sumCancelTax">0</h3>
+                        <span class="text-slate-500 font-medium">만원</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
+                    <p class="text-sm font-medium text-slate-500 mb-1">실제 환급 가능액</p>
+                    <div class="flex items-baseline gap-1">
+                        <h3 class="text-2xl font-bold text-emerald-600" id="sumRefundAmount">0</h3>
+                        <span class="text-slate-500 font-medium">만원</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Section -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-slate-800">📈 자산 성장 및 환급금 추이</h2>
+                    <p class="text-sm text-slate-500">유지 시 총액과 해지 시 실제로 손에 쥐는 금액의 차이를 확인하세요.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="growthChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Data Table Section -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-slate-800">📄 연도별 세부 전망</h2>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar pb-2">
+                    <table class="min-w-full divide-y divide-slate-200 text-sm text-right">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th scope="col" class="px-4 py-3 text-center font-medium text-slate-500 whitespace-nowrap">연차</th>
+                                <th scope="col" class="px-4 py-3 font-medium text-slate-500 whitespace-nowrap">해당년도<br>공제금액</th>
+                                <th scope="col" class="px-4 py-3 font-medium text-slate-500 whitespace-nowrap">누적<br>공제원금</th>
+                                <th scope="col" class="px-4 py-3 font-medium text-sky-600 whitespace-nowrap">누적 적립액<br>(A)</th>
+                                <th scope="col" class="px-4 py-3 font-medium text-red-500 whitespace-nowrap">해지 시 세금<br>(B)</th>
+                                <th scope="col" class="px-4 py-3 font-bold text-emerald-600 whitespace-nowrap">실제 환급금<br>(A-B)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody" class="bg-white divide-y divide-slate-100">
+                            <!-- JS will populate this -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script>
+    // 숫자 포맷팅 유틸리티 (천단위 콤마, 소수점 제거)
+    const formatNumber = (num) => Math.round(num).toLocaleString('ko-KR');
+
+    // 차트 인스턴스 전역 변수
+    let myChart = null;
+
+    // 초기화 및 이벤트 리스너 설정
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('calcForm');
+        
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            runSimulation();
+        });
+
+        // 초기 계산 실행
+        runSimulation();
+    });
+
+    function runSimulation() {
+        // 1. 입력값 가져오기 (단위: 만원 -> 원 단위로 내부 계산)
+        const a0 = parseFloat(document.getElementById('currentAmount').value) * 10000;
+        const pastDeduction = parseFloat(document.getElementById('pastDeduction').value) * 10000;
+        const pmt = parseFloat(document.getElementById('monthlyPmt').value) * 10000;
+        const years = parseInt(document.getElementById('years').value);
+        const annualRate = parseFloat(document.getElementById('rate').value) / 100;
+        const monthlyRate = annualRate / 12;
+
+        const results = [];
+        let currentAmount = a0;
+        let cumulativeDeductedPrincipal = pastDeduction;
+        
+        // 초기 공제받지 않은 원금 추정 (초기 적립액 - 과거 공제원금)
+        // 이자가 포함되어 있다면 다소 부정확할 수 있으나 제한된 입력값 내 최선의 추정치
+        let nonDeductedPrincipal = Math.max(0, a0 - pastDeduction);
+
+        // 2. 연도별 시뮬레이션 계산
+        for (let y = 1; y <= years; y++) {
+            let yearlyPayment = 0;
+            
+            // 월별 복리 계산
+            for (let m = 1; m <= 12; m++) {
+                currentAmount = currentAmount * (1 + monthlyRate) + pmt;
+                yearlyPayment += pmt;
+            }
+
+            // 연간 세액공제 한도 적용 (600만원 가정)
+            let deductibleThisYear = Math.min(yearlyPayment, 6000000);
+            cumulativeDeductedPrincipal += deductibleThisYear;
+            
+            // 공제 한도를 초과하여 납입한 원금은 과세 제외 대상에 누적
+            nonDeductedPrincipal += Math.max(0, yearlyPayment - deductibleThisYear);
+
+            // 해약환급금 계산
+            // 과세대상 = 총 적립액 - 공제받지 않은 원금 (즉, 공제받은 원금 + 전체 이자)
+            let taxableAmount = Math.max(0, currentAmount - nonDeductedPrincipal);
+            let cancelTax = taxableAmount * 0.165; // 16.5% 기타소득세
+            let refundAmount = currentAmount - cancelTax;
+
+            results.push({
+                year: y,
+                deductibleThisYear: deductibleThisYear,
+                cumulativeDeductedPrincipal: cumulativeDeductedPrincipal,
+                currentAmount: currentAmount,
+                cancelTax: cancelTax,
+                refundAmount: refundAmount
+            });
+        }
+
+        updateDashboard(results);
+    }
+
+    function updateDashboard(data) {
+        const lastYear = data[data.length - 1];
+
+        // 1. 요약 카드 업데이트 (만원 단위로 다시 변환하여 표시)
+        document.getElementById('sumTotalAmount').textContent = formatNumber(lastYear.currentAmount / 10000);
+        document.getElementById('sumCancelTax').textContent = formatNumber(lastYear.cancelTax / 10000);
+        document.getElementById('sumRefundAmount').textContent = formatNumber(lastYear.refundAmount / 10000);
+
+        // 2. 테이블 업데이트
+        const tbody = document.getElementById('dataTableBody');
+        tbody.innerHTML = '';
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50 transition-colors";
+            tr.innerHTML = `
+                <td class="px-4 py-3 text-center text-slate-700 font-medium">${row.year}년차</td>
+                <td class="px-4 py-3 text-slate-600">${formatNumber(row.deductibleThisYear / 10000)}</td>
+                <td class="px-4 py-3 text-slate-600">${formatNumber(row.cumulativeDeductedPrincipal / 10000)}</td>
+                <td class="px-4 py-3 text-sky-600 font-medium">${formatNumber(row.currentAmount / 10000)}</td>
+                <td class="px-4 py-3 text-red-500">${formatNumber(row.cancelTax / 10000)}</td>
+                <td class="px-4 py-3 text-emerald-600 font-bold bg-emerald-50/30">${formatNumber(row.refundAmount / 10000)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // 3. 차트 업데이트
+        updateChart(data);
+    }
+
+    function updateChart(data) {
+        const ctx = document.getElementById('growthChart').getContext('2d');
+        
+        const labels = data.map(d => `${d.year}년`);
+        const totalData = data.map(d => d.currentAmount / 10000);
+        const refundData = data.map(d => d.refundAmount / 10000);
+
+        if (myChart) {
+            myChart.destroy();
+        }
+
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: '누적 적립액 (유지 시)',
+                        data: totalData,
+                        borderColor: '#0ea5e9', // sky-500
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#0ea5e9',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: '실제 환급금 (해지 시)',
+                        data: refundData,
+                        borderColor: '#10b981', // emerald-500
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointBackgroundColor: '#10b981',
+                        pointRadius: 4,
+                        fill: false,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // CSS 컨테이너 제어 따름
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: { family: 'Pretendard' },
+                            usePointStyle: true,
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        titleFont: { family: 'Pretendard', size: 14 },
+                        bodyFont: { family: 'Pretendard', size: 13 },
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) {
+                                    label += formatNumber(context.parsed.y) + ' 만원';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            font: { family: 'Pretendard' },
+                            callback: function(value) {
+                                return value.toLocaleString() + '만';
+                            }
+                        },
+                        grid: { color: '#f1f5f9' }
+                    },
+                    x: {
+                        ticks: { font: { family: 'Pretendard' } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
