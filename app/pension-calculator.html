@@ -11,22 +11,18 @@
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; color: #334155; }
         
-        /* * Chart Container Styling (CRITICAL REQUIREMENT)
-         * 이 컨테이너는 차트의 크기를 엄격하게 제한하고 반응형 레이아웃을 유지합니다.
-         */
+        /* Chart Container Styling */
         .chart-container {
             position: relative;
             width: 100%;
             max-width: 100%;
             margin-left: auto;
             margin-right: auto;
-            height: 300px; /* 모바일 기본 높이 */
+            height: 300px;
             max-height: 400px;
         }
         @media (min-width: 768px) {
-            .chart-container {
-                height: 400px; /* 데스크탑/태블릿 높이 */
-            }
+            .chart-container { height: 400px; }
         }
 
         /* 테이블 스크롤바 디자인 */
@@ -37,21 +33,6 @@
     </style>
 </head>
 <body class="antialiased">
-
-<!-- Chosen Palette: Slate & Emerald/Sky (신뢰감, 금융, 긍정적 성장) -->
-<!-- Application Structure Plan: 
-     이 단일 페이지 애플리케이션은 사용자가 자신의 연금 상태를 입력하고 즉각적인 피드백을 받을 수 있는 대시보드 형태로 설계되었습니다.
-     1. 좌측/상단 제어 패널: 사용자 친화적인 단위(만원)로 필수 입력값을 수집합니다.
-     2. 우측/하단 결과 패널:
-        - 요약 카드: 최종 예상 환급금과 누적액 등 가장 중요한 핵심 지표를 강조합니다.
-        - 시각화(차트): 시간에 따른 누적 적립액과 해약 환급금의 성장 추이를 비교하여 보여줍니다.
-        - 상세 데이터(테이블): 연도별 세부 계산 내역을 투명하게 제공하여 사용자의 의사결정(유지 vs 해지)을 돕습니다.
-     이 구조는 '입력 -> 시각적 요약 -> 상세 분석'의 논리적 흐름을 따릅니다. -->
-<!-- Visualization & Content Choices: 
-     - Goal: 누적 성장과 페널티 비교 -> Viz: Line Chart (Chart.js) -> Interaction: Hover tooltips for exact values.
-     - Goal: 세부 수치 확인 -> Viz: Data Table (HTML/Tailwind) -> Interaction: Scrollable on mobile.
-     - Goal: 핵심 지표 강조 -> Viz: Summary Cards (HTML/Tailwind) -> Interaction: Dynamic updates based on input.
-     CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
 <div class="min-h-screen flex flex-col">
     <!-- Header -->
@@ -81,6 +62,28 @@
                 </div>
 
                 <form id="calcForm" class="space-y-4">
+                    <!-- 나이 입력 섹션 (신규) -->
+                    <div class="grid grid-cols-2 gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <label for="currentAge" class="block text-sm font-medium text-slate-700 mb-1">현재 나이</label>
+                            <div class="relative">
+                                <input type="number" id="currentAge" value="35" class="block w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-slate-500 sm:text-sm">세</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="pensionAge" class="block text-sm font-medium text-slate-700 mb-1">연금 개시 나이</label>
+                            <div class="relative">
+                                <input type="number" id="pensionAge" value="55" class="block w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-slate-500 sm:text-sm">세</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div>
                         <label for="currentAmount" class="block text-sm font-medium text-slate-700 mb-1">현재 적립액</label>
                         <div class="relative">
@@ -147,7 +150,7 @@
                     <li>연금저축 해약 시 기타소득세 <strong>16.5%</strong>가 부과됩니다.</li>
                     <li>과세 대상: 세액공제 받은 원금 + 전체 이자수익</li>
                     <li>세액공제 한도는 연 <strong>600만원</strong>으로 가정했습니다.</li>
-                    <li>본 결과는 단순 시뮬레이션이며 실제 금융기관 결과와 다를 수 있습니다.</li>
+                    <li>추가 납입 기간이 끝나면 연금 개시일까지 <strong>납입 원금 0원</strong>으로 이자만 복리로 굴러갑니다.</li>
                 </ul>
             </div>
         </div>
@@ -158,21 +161,21 @@
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 border-l-4 border-l-sky-500">
-                    <p class="text-sm font-medium text-slate-500 mb-1">최종 누적 적립액</p>
+                    <p class="text-sm font-medium text-slate-500 mb-1">개시 시점 최종 누적액</p>
                     <div class="flex items-baseline gap-1">
                         <h3 class="text-2xl font-bold text-slate-800" id="sumTotalAmount">0</h3>
                         <span class="text-slate-500 font-medium">만원</span>
                     </div>
                 </div>
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 border-l-4 border-l-red-400">
-                    <p class="text-sm font-medium text-slate-500 mb-1">중도 해약 시 예상 세금</p>
+                    <p class="text-sm font-medium text-slate-500 mb-1">개시 전액 해약 시 세금</p>
                     <div class="flex items-baseline gap-1">
                         <h3 class="text-2xl font-bold text-slate-800" id="sumCancelTax">0</h3>
                         <span class="text-slate-500 font-medium">만원</span>
                     </div>
                 </div>
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
-                    <p class="text-sm font-medium text-slate-500 mb-1">실제 환급 가능액</p>
+                    <p class="text-sm font-medium text-slate-500 mb-1">개시 전액 해약 시 환급금</p>
                     <div class="flex items-baseline gap-1">
                         <h3 class="text-2xl font-bold text-emerald-600" id="sumRefundAmount">0</h3>
                         <span class="text-slate-500 font-medium">만원</span>
@@ -183,8 +186,8 @@
             <!-- Chart Section -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                 <div class="mb-4">
-                    <h2 class="text-lg font-bold text-slate-800">📈 자산 성장 및 환급금 추이</h2>
-                    <p class="text-sm text-slate-500">유지 시 총액과 해지 시 실제로 손에 쥐는 금액의 차이를 확인하세요.</p>
+                    <h2 class="text-lg font-bold text-slate-800">📈 나이별 자산 성장 및 환급금 추이</h2>
+                    <p class="text-sm text-slate-500">납입 종료 후에도 연금 개시까지 복리로 불어나는 금액을 확인하세요.</p>
                 </div>
                 <div class="chart-container">
                     <canvas id="growthChart"></canvas>
@@ -194,13 +197,14 @@
             <!-- Data Table Section -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                 <div class="mb-4">
-                    <h2 class="text-lg font-bold text-slate-800">📄 연도별 세부 전망</h2>
+                    <h2 class="text-lg font-bold text-slate-800">📄 연도/나이별 세부 전망</h2>
                 </div>
                 <div class="overflow-x-auto custom-scrollbar pb-2">
                     <table class="min-w-full divide-y divide-slate-200 text-sm text-right">
                         <thead class="bg-slate-50">
                             <tr>
-                                <th scope="col" class="px-4 py-3 text-center font-medium text-slate-500 whitespace-nowrap">연차</th>
+                                <th scope="col" class="px-4 py-3 text-center font-medium text-slate-500 whitespace-nowrap">연차(나이)</th>
+                                <th scope="col" class="px-4 py-3 font-medium text-slate-500 whitespace-nowrap">당해년도<br>납입액</th>
                                 <th scope="col" class="px-4 py-3 font-medium text-slate-500 whitespace-nowrap">해당년도<br>공제금액</th>
                                 <th scope="col" class="px-4 py-3 font-medium text-slate-500 whitespace-nowrap">누적<br>공제원금</th>
                                 <th scope="col" class="px-4 py-3 font-medium text-sky-600 whitespace-nowrap">누적 적립액<br>(A)</th>
@@ -240,52 +244,63 @@
     });
 
     function runSimulation() {
-        // 1. 입력값 가져오기 (단위: 만원 -> 원 단위로 내부 계산)
+        // 1. 입력값 가져오기
+        const currentAge = parseInt(document.getElementById('currentAge').value);
+        const pensionAge = parseInt(document.getElementById('pensionAge').value);
         const a0 = parseFloat(document.getElementById('currentAmount').value) * 10000;
         const pastDeduction = parseFloat(document.getElementById('pastDeduction').value) * 10000;
         const pmt = parseFloat(document.getElementById('monthlyPmt').value) * 10000;
-        const years = parseInt(document.getElementById('years').value);
+        const paymentYears = parseInt(document.getElementById('years').value);
         const annualRate = parseFloat(document.getElementById('rate').value) / 100;
         const monthlyRate = annualRate / 12;
 
         const results = [];
         let currentAmount = a0;
         let cumulativeDeductedPrincipal = pastDeduction;
-        
-        // 초기 공제받지 않은 원금 추정 (초기 적립액 - 과거 공제원금)
-        // 이자가 포함되어 있다면 다소 부정확할 수 있으나 제한된 입력값 내 최선의 추정치
         let nonDeductedPrincipal = Math.max(0, a0 - pastDeduction);
 
+        // 시뮬레이션 기간 계산 (현재 나이부터 연금 개시 나이까지)
+        // 만약 개시 나이가 현재 나이보다 같거나 작으면 최소 1년으로 계산
+        let totalSimYears = Math.max(1, pensionAge - currentAge);
+
         // 2. 연도별 시뮬레이션 계산
-        for (let y = 1; y <= years; y++) {
+        for (let y = 1; y <= totalSimYears; y++) {
             let yearlyPayment = 0;
+            let currentYearAge = currentAge + y;
+            
+            // 납입 중인 연도인지 확인 (추가 납입 기간까지만 납입, 이후는 거치)
+            let isPayingPeriod = y <= paymentYears;
             
             // 월별 복리 계산
             for (let m = 1; m <= 12; m++) {
-                currentAmount = currentAmount * (1 + monthlyRate) + pmt;
-                yearlyPayment += pmt;
+                let monthlyContribution = isPayingPeriod ? pmt : 0;
+                currentAmount = currentAmount * (1 + monthlyRate) + monthlyContribution;
+                yearlyPayment += monthlyContribution;
             }
 
-            // 연간 세액공제 한도 적용 (600만원 가정)
-            let deductibleThisYear = Math.min(yearlyPayment, 6000000);
-            cumulativeDeductedPrincipal += deductibleThisYear;
-            
-            // 공제 한도를 초과하여 납입한 원금은 과세 제외 대상에 누적
-            nonDeductedPrincipal += Math.max(0, yearlyPayment - deductibleThisYear);
+            // 연간 세액공제 한도 적용 (납입한 원금이 있을 때만)
+            let deductibleThisYear = 0;
+            if (yearlyPayment > 0) {
+                deductibleThisYear = Math.min(yearlyPayment, 6000000);
+                cumulativeDeductedPrincipal += deductibleThisYear;
+                nonDeductedPrincipal += Math.max(0, yearlyPayment - deductibleThisYear);
+            }
 
             // 해약환급금 계산
-            // 과세대상 = 총 적립액 - 공제받지 않은 원금 (즉, 공제받은 원금 + 전체 이자)
             let taxableAmount = Math.max(0, currentAmount - nonDeductedPrincipal);
-            let cancelTax = taxableAmount * 0.165; // 16.5% 기타소득세
+            let cancelTax = taxableAmount * 0.165; 
             let refundAmount = currentAmount - cancelTax;
 
             results.push({
                 year: y,
+                age: currentYearAge,
+                yearlyPayment: yearlyPayment, // 당해년도 납입액 (적립금)
                 deductibleThisYear: deductibleThisYear,
                 cumulativeDeductedPrincipal: cumulativeDeductedPrincipal,
                 currentAmount: currentAmount,
                 cancelTax: cancelTax,
-                refundAmount: refundAmount
+                refundAmount: refundAmount,
+                isPayingPeriod: isPayingPeriod
             });
         }
 
@@ -295,7 +310,7 @@
     function updateDashboard(data) {
         const lastYear = data[data.length - 1];
 
-        // 1. 요약 카드 업데이트 (만원 단위로 다시 변환하여 표시)
+        // 1. 요약 카드 업데이트
         document.getElementById('sumTotalAmount').textContent = formatNumber(lastYear.currentAmount / 10000);
         document.getElementById('sumCancelTax').textContent = formatNumber(lastYear.cancelTax / 10000);
         document.getElementById('sumRefundAmount').textContent = formatNumber(lastYear.refundAmount / 10000);
@@ -305,9 +320,14 @@
         tbody.innerHTML = '';
         data.forEach(row => {
             const tr = document.createElement('tr');
-            tr.className = "hover:bg-slate-50 transition-colors";
+            // 거치 기간(납입종료)인 경우 행의 배경색을 살짝 다르게 표시
+            tr.className = row.isPayingPeriod ? "hover:bg-slate-50 transition-colors" : "bg-slate-50/50 hover:bg-slate-100 transition-colors text-slate-400";
+            
             tr.innerHTML = `
-                <td class="px-4 py-3 text-center text-slate-700 font-medium">${row.year}년차</td>
+                <td class="px-4 py-3 text-center text-slate-700 font-medium">
+                    ${row.year}년차 <span class="text-xs text-slate-400">(${row.age}세)</span>
+                </td>
+                <td class="px-4 py-3 text-slate-600">${formatNumber(row.yearlyPayment / 10000)}</td>
                 <td class="px-4 py-3 text-slate-600">${formatNumber(row.deductibleThisYear / 10000)}</td>
                 <td class="px-4 py-3 text-slate-600">${formatNumber(row.cumulativeDeductedPrincipal / 10000)}</td>
                 <td class="px-4 py-3 text-sky-600 font-medium">${formatNumber(row.currentAmount / 10000)}</td>
@@ -324,7 +344,8 @@
     function updateChart(data) {
         const ctx = document.getElementById('growthChart').getContext('2d');
         
-        const labels = data.map(d => `${d.year}년`);
+        // X축 라벨을 'OO세' 로 표시
+        const labels = data.map(d => `${d.age}세`);
         const totalData = data.map(d => d.currentAmount / 10000);
         const refundData = data.map(d => d.refundAmount / 10000);
 
@@ -340,7 +361,7 @@
                     {
                         label: '누적 적립액 (유지 시)',
                         data: totalData,
-                        borderColor: '#0ea5e9', // sky-500
+                        borderColor: '#0ea5e9', 
                         backgroundColor: 'rgba(14, 165, 233, 0.1)',
                         borderWidth: 2,
                         pointBackgroundColor: '#0ea5e9',
@@ -351,7 +372,7 @@
                     {
                         label: '실제 환급금 (해지 시)',
                         data: refundData,
-                        borderColor: '#10b981', // emerald-500
+                        borderColor: '#10b981', 
                         backgroundColor: 'transparent',
                         borderWidth: 2,
                         borderDash: [5, 5],
@@ -364,7 +385,7 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false, // CSS 컨테이너 제어 따름
+                maintainAspectRatio: false,
                 interaction: {
                     mode: 'index',
                     intersect: false,
@@ -382,6 +403,13 @@
                         titleFont: { family: 'Pretendard', size: 14 },
                         bodyFont: { family: 'Pretendard', size: 13 },
                         callbacks: {
+                            title: function(context) {
+                                // 툴팁 제목에 나이와 연차 함께 표시
+                                const dataIndex = context[0].dataIndex;
+                                const year = data[dataIndex].year;
+                                const age = data[dataIndex].age;
+                                return `${age}세 (${year}년차)`;
+                            },
                             label: function(context) {
                                 let label = context.dataset.label || '';
                                 if (label) { label += ': '; }
