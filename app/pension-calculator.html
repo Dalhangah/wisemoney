@@ -35,6 +35,21 @@
 <body class="antialiased">
 
 <div class="min-h-screen flex flex-col">
+    <div class="min-h-screen flex flex-col">
+    <div class="hidden print:flex items-center justify-between bg-white border border-slate-200 p-6 rounded-2xl mb-6 w-full">
+        <div class="flex items-center gap-5">
+            <img src="../resource/img/profilpic.jpg" alt="프로필 이미지" class="w-20 h-20 rounded-full border border-slate-200 object-cover">
+            <div>
+                <p class="text-sm font-bold text-slate-500 mb-1">언젠간 슬기로울 금융 생활 도전기</p>
+                <div class="text-xl font-bold text-slate-800">@WiseMoney.Toon</div>
+            </div>
+        </div>
+        <div class="flex-shrink-0">
+            <img src="../resource/img/qr.png" alt="인스타그램 QR" class="w-32 h-32 rounded-lg border border-slate-100">
+        </div>
+    </div>
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
     <!-- Header -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
@@ -67,7 +82,7 @@
                         <div>
                             <label for="currentAge" class="block text-sm font-medium text-slate-700 mb-1">현재 나이</label>
                             <div class="relative">
-                                <input type="number" id="currentAge" value="35" class="block w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                                <input type="number" id="currentAge" value="45" class="block w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
                                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                     <span class="text-slate-500 sm:text-sm">세</span>
                                 </div>
@@ -83,7 +98,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div>
                         <label for="currentAmount" class="block text-sm font-medium text-slate-700 mb-1">현재 적립액</label>
                         <div class="relative">
@@ -97,7 +111,7 @@
                     <div>
                         <label for="pastDeduction" class="block text-sm font-medium text-slate-700 mb-1">현재까지 받은 연금공제액(원금)</label>
                         <div class="relative">
-                            <input type="number" id="pastDeduction" value="1500" class="block w-full pl-3 pr-12 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                            <input type="number" id="pastDeduction" value="250" class="block w-full pl-3 pr-12 py-2 border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <span class="text-slate-500 sm:text-sm">만원</span>
                             </div>
@@ -135,6 +149,19 @@
                             </div>
                         </div>
                     </div>
+                    <div class="mb-4 pt-2 border-b border-slate-100 pb-4">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">연 근로소득 기준 (세액공제율)</label>
+                        <div class="flex gap-4 mt-2">
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="radio" name="incomeLevel" value="under" class="w-4 h-4 text-emerald-600 border-slate-300 focus:ring-emerald-500" checked>
+                                <span class="ml-2 text-sm text-slate-700">5,500만 원 이하 (16.5%)</span>
+                            </label>
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="radio" name="incomeLevel" value="over" class="w-4 h-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+                                <span class="ml-2 text-sm text-slate-700">5,500만 원 초과 (13.2%)</span>
+                            </label>
+                        </div>
+                    </div>
 
                     <div class="pt-4">
                         <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg shadow transition-colors flex justify-center items-center gap-2">
@@ -152,6 +179,21 @@
                     <li>세액공제 한도는 연 <strong>600만원</strong>으로 가정했습니다.</li>
                     <li>추가 납입 기간이 끝나면 연금 개시일까지 <strong>납입 원금 0원</strong>으로 이자만 복리로 굴러갑니다.</li>
                 </ul>
+            </div>            
+            <div class="print:hidden mt-4 flex items-center justify-between bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-3">
+                    <img src="../resource/img/profilpic.jpg" alt="프로필 이미지" class="w-14 h-14 rounded-full border border-slate-200 object-cover">
+                    <div>
+                        <p class="text-xs font-bold text-slate-500 mb-0.5">언젠간 슬기로울 금융 생활 도전기</p>
+                        <a href="https://www.instagram.com/wisemoney.toon" target="_blank" class="text-sm font-bold text-slate-800 hover:text-emerald-600 transition-colors flex items-center gap-1">
+                            @WiseMoney.Toon
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="flex-shrink-0 ml-2">
+                    <img src="../resource/img/qr.png" alt="인스타그램 QR" class="w-24 h-24 rounded-lg border border-slate-100">
+                </div>
             </div>
         </div>
 
@@ -205,11 +247,11 @@
                             <tr>
                                 <th scope="col" class="px-4 py-3 text-center font-medium text-slate-500 whitespace-nowrap">연차(나이)</th>
                                 <th scope="col" class="px-4 py-3 font-medium text-slate-500 whitespace-nowrap">당해년도<br>납입액</th>
-                                <th scope="col" class="px-4 py-3 font-medium text-slate-500 whitespace-nowrap">해당년도<br>공제금액</th>
-                                <th scope="col" class="px-4 py-3 font-medium text-slate-500 whitespace-nowrap">누적<br>공제원금</th>
+                                <th scope="col" class="px-4 py-3 font-medium text-slate-500 whitespace-nowrap">해당년도<br>세액공제</th>
                                 <th scope="col" class="px-4 py-3 font-medium text-sky-600 whitespace-nowrap">누적 적립액<br>(A)</th>
                                 <th scope="col" class="px-4 py-3 font-medium text-red-500 whitespace-nowrap">해지 시 세금<br>(B)</th>
-                                <th scope="col" class="px-4 py-3 font-bold text-emerald-600 whitespace-nowrap">실제 환급금<br>(A-B)</th>
+                                <th scope="col" class="px-4 py-3 font-medium text-red-500 whitespace-nowrap">세액공제<br>누계액(C)</th>
+                                <th scope="col" class="px-4 py-3 font-bold text-emerald-600 whitespace-nowrap">실제 환급금<br>(A-B-C)</th>
                             </tr>
                         </thead>
                         <tbody id="dataTableBody" class="bg-white divide-y divide-slate-100">
@@ -253,7 +295,9 @@
         const paymentYears = parseInt(document.getElementById('years').value);
         const annualRate = parseFloat(document.getElementById('rate').value) / 100;
         const monthlyRate = annualRate / 12;
-
+        // [신규 추가] 소득 수준에 따른 세액공제율 결정
+        const incomeLevel = document.querySelector('input[name="incomeLevel"]:checked').value;
+        const taxRefundRate = incomeLevel === 'under' ? 0.165 : 0.132;
         const results = [];
         let currentAmount = a0;
         let cumulativeDeductedPrincipal = pastDeduction;
@@ -280,22 +324,24 @@
 
             // 연간 세액공제 한도 적용 (납입한 원금이 있을 때만)
             let deductibleThisYear = 0;
+            let taxRefundThisYear = 0; // 신규: 실제 돌려받는 세금 환급액 변수
             if (yearlyPayment > 0) {
                 deductibleThisYear = Math.min(yearlyPayment, 6000000);
-                cumulativeDeductedPrincipal += deductibleThisYear;
+                taxRefundThisYear = deductibleThisYear * taxRefundRate; // 공제율을 곱해 실제 환급액 산출
+                cumulativeDeductedPrincipal += taxRefundThisYear;
                 nonDeductedPrincipal += Math.max(0, yearlyPayment - deductibleThisYear);
             }
 
             // 해약환급금 계산
             let taxableAmount = Math.max(0, currentAmount - nonDeductedPrincipal);
             let cancelTax = taxableAmount * 0.165; 
-            let refundAmount = currentAmount - cancelTax;
+            let refundAmount = currentAmount - cancelTax - cumulativeDeductedPrincipal;
 
             results.push({
                 year: y,
                 age: currentYearAge,
                 yearlyPayment: yearlyPayment, // 당해년도 납입액 (적립금)
-                deductibleThisYear: deductibleThisYear,
+                deductibleThisYear: taxRefundThisYear,
                 cumulativeDeductedPrincipal: cumulativeDeductedPrincipal,
                 currentAmount: currentAmount,
                 cancelTax: cancelTax,
@@ -329,9 +375,9 @@
                 </td>
                 <td class="px-4 py-3 text-slate-600">${formatNumber(row.yearlyPayment / 10000)}</td>
                 <td class="px-4 py-3 text-slate-600">${formatNumber(row.deductibleThisYear / 10000)}</td>
-                <td class="px-4 py-3 text-slate-600">${formatNumber(row.cumulativeDeductedPrincipal / 10000)}</td>
                 <td class="px-4 py-3 text-sky-600 font-medium">${formatNumber(row.currentAmount / 10000)}</td>
                 <td class="px-4 py-3 text-red-500">${formatNumber(row.cancelTax / 10000)}</td>
+                <td class="px-4 py-3 text-red-500">${formatNumber(row.cumulativeDeductedPrincipal / 10000)}</td>
                 <td class="px-4 py-3 text-emerald-600 font-bold bg-emerald-50/30">${formatNumber(row.refundAmount / 10000)}</td>
             `;
             tbody.appendChild(tr);
