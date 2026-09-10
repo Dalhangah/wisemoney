@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiseMoney App 이자 계산기 (단리·복리 비교) - 슬기로운 금융생활</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { 
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; 
+            background-color: #f8fafc; 
+            color: #334155; 
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container { height: 360px; }
+        }
+
+        /* 테이블 전용 스크롤바 */
+        .custom-scrollbar::-webkit-scrollbar { height: 7px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col bg-slate-50 text-slate-700">
+
+    <!-- 인쇄 전용 헤더 (화면 숨김) -->
+    <div class="hidden print:flex items-center justify-between bg-white border border-slate-200 p-6 rounded-2xl mb-6 max-w-[1600px] mx-auto w-full">
+        <div class="flex items-center gap-5">
+            <img src="../resource/img/profilpic.jpg" onerror="this.src='https://via.placeholder.com/80'" alt="프로필 이미지" class="w-20 h-20 rounded-full border border-slate-200 object-cover">
+            <div>
+                <p class="text-sm font-bold text-slate-500 mb-1">언젠간 슬기로울 금융 생활 도전기</p>
+                <div class="text-xl font-bold text-slate-800">WiseMoney 이자 시뮬레이션 리포트</div>
+            </div>
+        </div>
+        <div class="flex-shrink-0">
+            <img src="../resource/img/qr.png" onerror="this.src='https://via.placeholder.com/120'" alt="인스타그램 QR" class="w-28 h-28 rounded-lg border border-slate-100">
+        </div>
+    </div>
+
+    <!-- 상단 글로벌 내비게이션 바 (print:hidden) -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm print:hidden">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            
+            <div class="flex items-center gap-2.5 min-w-0">
+                <a href="../index.html" class="flex items-center gap-2 group flex-shrink-0">
+                    <span class="text-2xl transform group-hover:scale-110 transition-transform">💰</span>
+                    <span class="text-lg font-black tracking-tight text-slate-900 group-hover:text-emerald-600 transition-colors">슬기로운 금융생활</span>
+                </a>
+                
+                <div class="flex items-center gap-2 min-w-0">
+                    <svg class="w-4 h-4 text-slate-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                    <span class="text-base font-bold text-slate-800 truncate" id="currentAppTitle">이자 계산기</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button type="button" id="menuOpenBtn" aria-label="모든 금융 도구 목록 열기" aria-expanded="false"
+                    class="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all flex items-center gap-1.5">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                    <span class="text-xs font-semibold hidden sm:inline-block pr-1">모든 도구</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 우측 오프캔버스 슬라이딩 드로어 메뉴 -->
+    <div id="drawerContainer" class="fixed inset-0 z-50 pointer-events-none transition-opacity duration-300 ease-in-out opacity-0 print:hidden">
+        <div id="drawerBackdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity duration-300"></div>
+
+        <aside id="drawerPanel" 
+            class="absolute top-0 right-0 w-full max-w-sm sm:max-w-md h-full bg-white shadow-2xl border-l border-slate-200 flex flex-col transform translate-x-full transition-transform duration-300 ease-out pointer-events-auto">
+            
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🧰</span>
+                    <h2 class="text-lg font-bold text-slate-800">WiseMoney 금융 도구함</h2>
+                </div>
+                <button type="button" id="menuCloseBtn" aria-label="메뉴 닫기"
+                    class="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="flex-grow overflow-y-auto custom-scrollbar p-6 space-y-7">
+                <section>
+                    <div class="flex items-center gap-1.5 mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
+                        <span>📈</span>
+                        <span>투자 & 자산 증식</span>
+                    </div>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="./interest-calculator.html" 
+                               class="flex items-center justify-between p-3 rounded-xl border border-emerald-500 bg-emerald-50/40 text-emerald-900 font-semibold shadow-xs transition-all">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <span class="p-2 rounded-lg bg-emerald-100 text-emerald-700 text-sm">🧮</span>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-bold text-slate-800 truncate">이자 계산기 (단리·복리)</p>
+                                        <p class="text-xs text-slate-500 truncate">단리/년복리/월복리 방식별 수익 비교</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-600 text-white font-medium flex-shrink-0">사용중</span>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+
+                <section>
+                    <div class="flex items-center gap-1.5 mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
+                        <span>🛡️</span>
+                        <span>연금 & 세제 혜택</span>
+                    </div>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#" 
+                               class="flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 transition-all group">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <span class="p-2 rounded-lg bg-slate-100 group-hover:bg-slate-200 text-slate-600 text-sm">📊</span>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium text-slate-800 group-hover:text-emerald-600 transition-colors truncate">연금 갈아타기 분석기</p>
+                                        <p class="text-xs text-slate-400 truncate">중도해지 세액 및 장기 복리 환급금</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-slate-400 text-white font-medium flex-shrink-0">점검중</span>
+                                <!--svg class="w-4 h-4 text-slate-300 group-hover:text-slate-500 flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg-->
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+
+            <div class="p-5 border-t border-slate-200 bg-slate-50">
+                <a href="https://www.instagram.com/wisemoney.toon" target="_blank" rel="noopener noreferrer" 
+                   class="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs hover:border-emerald-500 transition-all group">
+                    <div class="flex items-center gap-3">
+                        <img src="../resource/img/profilpic.jpg" onerror="this.src='https://via.placeholder.com/40'" class="w-10 h-10 rounded-full border border-slate-200 object-cover" alt="프로필">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400">슬기로운 금융 생활 툰</p>
+                            <p class="text-sm font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">@WiseMoney.Toon</p>
+                        </div>
+                    </div>
+                    <svg class="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+            </div>
+        </aside>
+    </div>
+
+    <!-- 메인 레이아웃 -->
+    <main class="flex-grow max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-7 flex flex-col lg:flex-row items-start gap-7">
+        
+        <!-- 좌측 설정 사이드바 (고정 폭 330px ~ 350px) -->
+        <aside class="w-full lg:w-[330px] xl:w-[350px] flex-shrink-0 space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+                <div class="mb-5">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <span>📝</span> 저축 및 이자 조건 설정
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">현재 상태와 향후 적립 계획을 입력해주세요.</p>
+                </div>
+
+                <form id="interestForm" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3 border-b border-slate-100 pb-4">
+                        <div>
+                            <label for="currentAge" class="block text-xs font-semibold text-slate-700 mb-1">현재 나이</label>
+                            <div class="relative">
+                                <input type="number" id="currentAge" value="30" min="0" max="100" class="block w-full pl-3 pr-7 py-2 text-sm border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                                <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
+                                    <span class="text-slate-400 text-xs">세</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="years" class="block text-xs font-semibold text-slate-700 mb-1">납입 기간</label>
+                            <div class="relative">
+                                <input type="number" id="years" value="10" min="1" max="50" class="block w-full pl-3 pr-7 py-2 text-sm border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                                <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
+                                    <span class="text-slate-400 text-xs">년</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 초기 적립액 섹션 -->
+                    <div class="border-b border-slate-100 pb-4">
+                        <label for="initialAmount" class="block text-xs font-semibold text-slate-700 mb-1">기존 적립액 (초기 잔액)</label>
+                        <div class="relative">
+                            <input type="number" id="initialAmount" value="0" min="0" step="1" class="block w-full pl-3 pr-11 py-2 text-sm border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-slate-400 text-xs">만원</span>
+                            </div>
+                        </div>
+
+                        <!-- 기존 이자 별도 입력 토글 -->
+                        <div class="mt-2.5">
+                            <label class="inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="hasSeparateInterest" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
+                                <span class="ml-2 text-xs font-semibold text-slate-700">기존 적립액 중 이자 별도 입력</span>
+                            </label>
+
+                            <div id="separateInterestWrapper" class="hidden mt-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                <label for="separateInterestAmount" class="block text-[11px] font-medium text-slate-600 mb-1">기존 발생 이자</label>
+                                <div class="relative">
+                                    <input type="number" id="separateInterestAmount" value="0" min="0" step="1" class="block w-full pl-3 pr-10 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 bg-white">
+                                    <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
+                                        <span class="text-slate-400 text-xs">만원</span>
+                                    </div>
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-1">원금과 이자를 분리하여 1년차 계산에 정밀 반영합니다.</p>
+                            </div>
+
+                            <p id="interestIncludedNotice" class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                                * 미체크 시 전액을 이미 이자가 포함된 기초 원금으로 간주합니다.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 월 납부액 및 연이율 -->
+                    <div class="space-y-3">
+                        <div>
+                            <label for="monthlyPmt" class="block text-xs font-semibold text-slate-700 mb-1">추가 납입할 월 납부액</label>
+                            <div class="relative">
+                                <input type="number" id="monthlyPmt" value="10" min="0" step="1" class="block w-full pl-3 pr-11 py-2 text-sm border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-slate-400 text-xs">만원</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="annualRate" class="block text-xs font-semibold text-slate-700 mb-1">적용 연이율</label>
+                            <div class="relative">
+                                <input type="number" id="annualRate" value="12.0" step="0.1" min="0" max="100" class="block w-full pl-3 pr-7 py-2 text-sm border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors" required>
+                                <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
+                                    <span class="text-slate-400 text-xs">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-sm hover:shadow transition-all flex justify-center items-center gap-2 text-sm">
+                            <span>🚀</span> 이자 시뮬레이션 실행
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- 단리 공식 안내 -->
+            <div class="bg-slate-100 rounded-xl p-4 text-xs text-slate-600 border border-slate-200">
+                <p class="font-bold text-slate-700 mb-1.5 flex items-center gap-1">
+                    <span>ℹ️</span> 단리 이자 계산 공식
+                </p>
+                <div class="space-y-1.5 leading-relaxed text-slate-500">
+                    <p>• <strong>신규 납입분:</strong> 매월 납입 시 $11+10+\dots+1+0 = 66$개월분 이자가 적용됩니다.</p>
+                    <p class="font-mono bg-white p-2 rounded border border-slate-200 text-emerald-800 text-[11px]">
+                        당해 단리이자 = ((총적립원금 - 올해 추가납입금) × 연이율) + (월납부액 × 연이율 / 12 × 66)
+                    </p>
+                    <p>• <strong>기존 원금:</strong> 전년도까지 적립된 누적 원금은 연이율 전체(12개월)가 반영됩니다.</p>
+                </div>
+            </div>            
+
+            <!-- 인스타그램 홍보 박스 -->
+            <div class="print:hidden flex items-center justify-between bg-white rounded-xl border border-slate-200 p-3.5 shadow-sm">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <img src="../resource/img/profilpic.jpg" onerror="this.src='https://via.placeholder.com/48'" alt="프로필 이미지" class="w-11 h-11 rounded-full border border-slate-200 object-cover flex-shrink-0">
+                    <div class="min-w-0">
+                        <p class="text-[11px] font-bold text-slate-400 truncate">슬기로운 금융 생활 툰</p>
+                        <a href="https://www.instagram.com/wisemoney.toon" target="_blank" class="text-xs font-bold text-slate-800 hover:text-emerald-600 transition-colors flex items-center gap-0.5 truncate">
+                            @WiseMoney.Toon
+                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="flex-shrink-0 ml-2">
+                    <img src="../resource/img/qr.png" onerror="this.src='https://via.placeholder.com/80'" alt="인스타그램 QR" class="w-16 h-16 rounded-lg border border-slate-100">
+                </div>
+            </div>  
+        </aside>
+
+        <!-- 우측 메인 대시보드 (flex-1 유동 확장) -->
+        <section class="flex-1 min-w-0 w-full space-y-6">
+            
+            <!-- 상단 요약 카드 (정수 반올림 표기) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 border-l-4 border-l-slate-400">
+                    <p class="text-xs font-semibold text-slate-500 mb-1">총 납입 원금</p>
+                    <div class="flex items-baseline gap-1">
+                        <h3 class="text-2xl font-black text-slate-800" id="cardTotalPrincipal">0</h3>
+                        <span class="text-slate-500 font-medium text-sm">만원</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1" id="cardPrincipalDetail">초기 0 + 적립 0</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 border-l-4 border-l-amber-500">
+                    <p class="text-xs font-semibold text-amber-700 mb-1">단리 만기 총액</p>
+                    <div class="flex items-baseline gap-1">
+                        <h3 class="text-2xl font-black text-amber-600" id="cardSimpleTotal">0</h3>
+                        <span class="text-slate-500 font-medium text-sm">만원</span>
+                    </div>
+                    <p class="text-xs text-amber-600 font-medium mt-1" id="cardSimpleInterest">누적 이자: +0 만원</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
+                    <p class="text-xs font-semibold text-emerald-700 mb-1">월복리 만기 총액</p>
+                    <div class="flex items-baseline gap-1">
+                        <h3 class="text-2xl font-black text-emerald-600" id="cardMonthlyTotal">0</h3>
+                        <span class="text-slate-500 font-medium text-sm">만원</span>
+                    </div>
+                    <p class="text-xs text-emerald-600 font-bold mt-1" id="cardDiffNotice">단리 대비 +0 만원 이득</p>
+                </div>
+            </div>
+
+            <!-- 자산 추이 그래프 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+                <div class="mb-3">
+                    <h2 class="text-base font-bold text-slate-800">📈 이자 계산 방식별 총 누적액 추이 비교</h2>
+                    <p class="text-xs text-slate-500">시간이 지날수록 단리, 년복리, 월복리 간에 벌어지는 자산 격차를 확인하세요.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="interestChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 연도별 상세 데이터 테이블 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+                <div class="mb-4">
+                    <h2 class="text-base font-bold text-slate-800">📄 연도별 상세 적립 및 이자 명세표</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">
+                        * 금년 이자는 소수점 1자리(고정), 누적 이자와 총액은 정수(반올림)로 표시됩니다. (단위: 만원)
+                    </p>
+                </div>
+                
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-right border-collapse text-xs sm:text-[13px]">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-700 border-b border-slate-200">
+                                <th scope="col" rowspan="2" class="px-2.5 py-3 text-center font-bold text-slate-700 border-r border-slate-200 whitespace-nowrap">연차(나이)</th>
+                                <th scope="col" rowspan="2" class="px-2.5 py-3 font-semibold text-slate-600 border-r border-slate-200 whitespace-nowrap">올해 추가<br>납입금</th>
+                                <th scope="col" rowspan="2" class="px-2.5 py-3 font-bold text-slate-800 border-r border-slate-200 whitespace-nowrap">총 적립<br>원금</th>
+                                
+                                <th scope="col" colspan="3" class="px-2 py-2 text-center font-bold text-amber-800 border-r border-slate-200 bg-amber-50/60 whitespace-nowrap">단리 계산</th>
+                                <th scope="col" colspan="3" class="px-2 py-2 text-center font-bold text-sky-800 border-r border-slate-200 bg-sky-50/60 whitespace-nowrap">년복리 계산</th>
+                                <th scope="col" colspan="3" class="px-2 py-2 text-center font-bold text-emerald-800 bg-emerald-50/70 whitespace-nowrap">월복리 계산</th>
+                            </tr>
+                            <tr class="text-[11px] sm:text-xs border-b border-slate-200">
+                                <!-- 단리 -->
+                                <th scope="col" class="px-2 py-2 font-medium text-amber-700 whitespace-nowrap bg-amber-50/20">금년 이자</th>
+                                <th scope="col" class="px-2 py-2 font-medium text-slate-500 whitespace-nowrap bg-amber-50/20">누적 이자</th>
+                                <th scope="col" class="px-2 py-2 font-bold text-amber-900 border-r border-slate-200 whitespace-nowrap bg-amber-50/30">총액</th>
+
+                                <!-- 년복리 -->
+                                <th scope="col" class="px-2 py-2 font-medium text-sky-700 whitespace-nowrap bg-sky-50/20">금년 이자</th>
+                                <th scope="col" class="px-2 py-2 font-medium text-slate-500 whitespace-nowrap bg-sky-50/20">누적 이자</th>
+                                <th scope="col" class="px-2 py-2 font-bold text-sky-900 border-r border-slate-200 whitespace-nowrap bg-sky-50/30">총액</th>
+
+                                <!-- 월복리 -->
+                                <th scope="col" class="px-2 py-2 font-medium text-emerald-700 whitespace-nowrap bg-emerald-50/20">금년 이자</th>
+                                <th scope="col" class="px-2 py-2 font-medium text-slate-500 whitespace-nowrap bg-emerald-50/20">누적 이자</th>
+                                <th scope="col" class="px-2 py-2 font-bold text-emerald-900 whitespace-nowrap bg-emerald-50/40">총액</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody" class="bg-white divide-y divide-slate-100 font-mono">
+                            <!-- JS를 통해 1년차부터 렌더링 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12 print:hidden">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <p>&copy; WiseMoney. All rights reserved.</p>
+            <p class="text-center sm:text-right">본 시뮬레이터는 세전 기준 계산 결과이며 금융기관별 상품 약관에 따라 실제 수령액과 다를 수 있습니다.</p>
+        </div>
+    </footer>
+
+    <!-- 자바스크립트 로직 -->
+    <script>
+        // 1) 당해 이자 전용: 무조건 소수점 첫째 자리까지 고정 표시 (21 -> 21.0, 6.6 -> 6.6)
+        const formatDecimal = (num) => {
+            return (Math.round(num * 10) / 10).toLocaleString('ko-KR', { 
+                minimumFractionDigits: 1, 
+                maximumFractionDigits: 1 
+            });
+        };
+
+        // 2) 나머지 모든 수치(원금, 누적 이자, 총액 등): 반올림하여 소수점 없는 정수 표시
+        const formatInteger = (num) => {
+            return Math.round(num).toLocaleString('ko-KR');
+        };
+
+        let myChart = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initDrawer();
+            initToggleInterest();
+
+            const form = document.getElementById('interestForm');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                runSimulation();
+            });
+
+            // 초기 실행
+            runSimulation();
+        });
+
+        // 1. 기존 발생 이자 입력 토글
+        function initToggleInterest() {
+            const checkbox = document.getElementById('hasSeparateInterest');
+            const wrapper = document.getElementById('separateInterestWrapper');
+            const notice = document.getElementById('interestIncludedNotice');
+
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    wrapper.classList.remove('hidden');
+                    notice.classList.add('hidden');
+                } else {
+                    wrapper.classList.add('hidden');
+                    notice.classList.remove('hidden');
+                    document.getElementById('separateInterestAmount').value = 0;
+                }
+                runSimulation();
+            });
+        }
+
+        // 2. 사이드 드로어 제어
+        function initDrawer() {
+            const menuOpenBtn = document.getElementById('menuOpenBtn');
+            const menuCloseBtn = document.getElementById('menuCloseBtn');
+            const drawerContainer = document.getElementById('drawerContainer');
+            const drawerBackdrop = document.getElementById('drawerBackdrop');
+            const drawerPanel = document.getElementById('drawerPanel');
+
+            const openDrawer = () => {
+                drawerContainer.classList.remove('pointer-events-none', 'opacity-0');
+                drawerContainer.classList.add('pointer-events-auto', 'opacity-100');
+                drawerPanel.classList.remove('translate-x-full');
+                drawerPanel.classList.add('translate-x-0');
+                menuOpenBtn.setAttribute('aria-expanded', 'true');
+                document.body.classList.add('overflow-hidden');
+            };
+
+            const closeDrawer = () => {
+                drawerPanel.classList.remove('translate-x-0');
+                drawerPanel.classList.add('translate-x-full');
+                drawerContainer.classList.remove('opacity-100');
+                drawerContainer.classList.add('opacity-0');
+
+                setTimeout(() => {
+                    drawerContainer.classList.remove('pointer-events-auto');
+                    drawerContainer.classList.add('pointer-events-none');
+                }, 300);
+
+                menuOpenBtn.setAttribute('aria-expanded', 'false');
+                document.body.classList.remove('overflow-hidden');
+            };
+
+            menuOpenBtn.addEventListener('click', openDrawer);
+            menuCloseBtn.addEventListener('click', closeDrawer);
+            drawerBackdrop.addEventListener('click', closeDrawer);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && menuOpenBtn.getAttribute('aria-expanded') === 'true') {
+                    closeDrawer();
+                }
+            });
+        }
+
+        // 3. 핵심 이자 시뮬레이션 계산
+        function runSimulation() {
+            const currentAge = parseInt(document.getElementById('currentAge').value) || 0;
+            const years = parseInt(document.getElementById('years').value) || 1;
+            const annualRate = (parseFloat(document.getElementById('annualRate').value) || 0) / 100;
+            const monthlyRate = annualRate / 12;
+
+            const initialAmount = (parseFloat(document.getElementById('initialAmount').value) || 0) * 10000;
+            const monthlyPmt = (parseFloat(document.getElementById('monthlyPmt').value) || 0) * 10000;
+            
+            const hasSeparateInterest = document.getElementById('hasSeparateInterest').checked;
+            const initialInterest = hasSeparateInterest ? ((parseFloat(document.getElementById('separateInterestAmount').value) || 0) * 10000) : 0;
+
+            const initialPrincipal = initialAmount;
+            let startingBalance = initialAmount + initialInterest;
+
+            const results = [];
+
+            let cumulativeSimpleInterest = initialInterest;
+            let runningAnnualTotal = startingBalance;
+            let runningMonthlyTotal = startingBalance;
+
+            for (let y = 1; y <= years; y++) {
+                const thisYearAge = currentAge + y;
+                const yearlyPayment = monthlyPmt * 12;
+                const cumulativePrincipal = initialPrincipal + (yearlyPayment * y);
+
+                // --- [1] 단리 계산 ---
+                // 단리이자 = ((총적립원금 - 올해 추가 납입금) * 연이율) + (월납부액 * 연이율 / 12 * 66)
+                const priorPrincipal = cumulativePrincipal - yearlyPayment;
+                const thisYearSimpleInterest = (priorPrincipal * annualRate) + (monthlyPmt * (annualRate / 12) * 66);
+                cumulativeSimpleInterest += thisYearSimpleInterest;
+                const simpleTotal = cumulativePrincipal + cumulativeSimpleInterest;
+
+                // --- [2] 년복리 계산 ---
+                const annualInterestOnBalance = runningAnnualTotal * annualRate;
+                const annualInterestOnNewDeposit = monthlyPmt * (annualRate / 12) * 66;
+                const thisYearAnnualInterest = annualInterestOnBalance + annualInterestOnNewDeposit;
+                runningAnnualTotal = runningAnnualTotal + yearlyPayment + thisYearAnnualInterest;
+                const cumulativeAnnualInterest = runningAnnualTotal - cumulativePrincipal;
+
+                // --- [3] 월복리 계산 ---
+                const prevMonthlyTotal = runningMonthlyTotal;
+                for (let m = 1; m <= 12; m++) {
+                    runningMonthlyTotal = (runningMonthlyTotal * (1 + monthlyRate)) + monthlyPmt;
+                }
+                const thisYearMonthlyInterest = runningMonthlyTotal - prevMonthlyTotal - yearlyPayment;
+                const cumulativeMonthlyInterest = runningMonthlyTotal - cumulativePrincipal;
+
+                results.push({
+                    year: y,
+                    age: thisYearAge,
+                    yearlyPayment: yearlyPayment,
+                    cumulativePrincipal: cumulativePrincipal,
+
+                    // 단리
+                    thisYearSimpleInterest: thisYearSimpleInterest,
+                    cumulativeSimpleInterest: cumulativeSimpleInterest,
+                    simpleTotal: simpleTotal,
+
+                    // 년복리
+                    thisYearAnnualInterest: thisYearAnnualInterest,
+                    cumulativeAnnualInterest: cumulativeAnnualInterest,
+                    annualTotal: runningAnnualTotal,
+
+                    // 월복리
+                    thisYearMonthlyInterest: thisYearMonthlyInterest,
+                    cumulativeMonthlyInterest: cumulativeMonthlyInterest,
+                    monthlyTotal: runningMonthlyTotal
+                });
+            }
+
+            updateDashboard(results, initialPrincipal, monthlyPmt, years);
+        }
+
+        // 4. 대시보드 업데이트 (서식 분리 적용)
+        function updateDashboard(data, initialPrincipal, monthlyPmt, years) {
+            const finalData = data[data.length - 1];
+
+            // 1) 상단 요약 카드 (정수 반올림 표기)
+            document.getElementById('cardTotalPrincipal').textContent = formatInteger(finalData.cumulativePrincipal / 10000);
+            document.getElementById('cardPrincipalDetail').textContent = 
+                `초기 ${formatInteger(initialPrincipal / 10000)}만 + 매월 ${formatInteger(monthlyPmt / 10000)}만 × ${years * 12}회`;
+
+            document.getElementById('cardSimpleTotal').textContent = formatInteger(finalData.simpleTotal / 10000);
+            document.getElementById('cardSimpleInterest').textContent = `누적 이자: +${formatInteger(finalData.cumulativeSimpleInterest / 10000)} 만원`;
+
+            document.getElementById('cardMonthlyTotal').textContent = formatInteger(finalData.monthlyTotal / 10000);
+            const diff = (finalData.monthlyTotal - finalData.simpleTotal) / 10000;
+            document.getElementById('cardDiffNotice').textContent = `단리 대비 +${formatInteger(diff)} 만원 더 받음!`;
+
+            // 2) 테이블 렌더링
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/90 transition-colors";
+
+                tr.innerHTML = `
+                    <td class="px-2.5 py-2.5 text-center text-slate-700 font-semibold font-sans border-r border-slate-100 whitespace-nowrap">
+                        ${row.year}년차 <span class="text-[11px] text-slate-400 font-normal">(${row.age}세)</span>
+                    </td>
+                    <td class="px-2.5 py-2.5 text-slate-600 border-r border-slate-100 whitespace-nowrap">${formatInteger(row.yearlyPayment / 10000)}</td>
+                    <td class="px-2.5 py-2.5 font-bold text-slate-800 border-r border-slate-200 whitespace-nowrap">${formatInteger(row.cumulativePrincipal / 10000)}</td>
+                    
+                    <!-- 단리 (금년 이자: 소수점 1자리 고정 / 누적 및 총액: 정수) -->
+                    <td class="px-2 py-2.5 text-amber-700 font-medium whitespace-nowrap bg-amber-50/10">${formatDecimal(row.thisYearSimpleInterest / 10000)}</td>
+                    <td class="px-2 py-2.5 text-slate-500 whitespace-nowrap bg-amber-50/10">${formatInteger(row.cumulativeSimpleInterest / 10000)}</td>
+                    <td class="px-2 py-2.5 font-bold text-amber-900 border-r border-slate-200 whitespace-nowrap bg-amber-50/20">${formatInteger(row.simpleTotal / 10000)}</td>
+                    
+                    <!-- 년복리 (금년 이자: 소수점 1자리 고정 / 누적 및 총액: 정수) -->
+                    <td class="px-2 py-2.5 text-sky-700 font-medium whitespace-nowrap bg-sky-50/10">${formatDecimal(row.thisYearAnnualInterest / 10000)}</td>
+                    <td class="px-2 py-2.5 text-slate-500 whitespace-nowrap bg-sky-50/10">${formatInteger(row.cumulativeAnnualInterest / 10000)}</td>
+                    <td class="px-2 py-2.5 font-bold text-sky-900 border-r border-slate-200 whitespace-nowrap bg-sky-50/20">${formatInteger(row.annualTotal / 10000)}</td>
+                    
+                    <!-- 월복리 (금년 이자: 소수점 1자리 고정 / 누적 및 총액: 정수) -->
+                    <td class="px-2 py-2.5 text-emerald-700 font-medium whitespace-nowrap bg-emerald-50/20">${formatDecimal(row.thisYearMonthlyInterest / 10000)}</td>
+                    <td class="px-2 py-2.5 text-slate-500 whitespace-nowrap bg-emerald-50/20">${formatInteger(row.cumulativeMonthlyInterest / 10000)}</td>
+                    <td class="px-2 py-2.5 font-bold text-emerald-900 whitespace-nowrap bg-emerald-50/30">${formatInteger(row.monthlyTotal / 10000)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // 3) 차트 업데이트
+            updateChart(data);
+        }
+
+        // 5. Chart.js 시각화
+        function updateChart(data) {
+            const ctx = document.getElementById('interestChart').getContext('2d');
+            
+            const labels = data.map(d => `${d.year}년차(${d.age}세)`);
+            const principalData = data.map(d => Math.round(d.cumulativePrincipal / 10000));
+            const simpleData = data.map(d => Math.round(d.simpleTotal / 10000));
+            const annualData = data.map(d => Math.round(d.annualTotal / 10000));
+            const monthlyData = data.map(d => Math.round(d.monthlyTotal / 10000));
+
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '월복리 총액',
+                            data: monthlyData,
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.08)',
+                            borderWidth: 2.5,
+                            pointBackgroundColor: '#059669',
+                            pointRadius: 4,
+                            fill: true,
+                            tension: 0.2
+                        },
+                        {
+                            label: '년복리 총액',
+                            data: annualData,
+                            borderColor: '#0284c7',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [4, 4],
+                            pointBackgroundColor: '#0284c7',
+                            pointRadius: 3.5,
+                            fill: false,
+                            tension: 0.2
+                        },
+                        {
+                            label: '단리 총액',
+                            data: simpleData,
+                            borderColor: '#d97706',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#d97706',
+                            pointRadius: 3.5,
+                            fill: false,
+                            tension: 0.2
+                        },
+                        {
+                            label: '순수 납입원금',
+                            data: principalData,
+                            borderColor: '#94a3b8',
+                            backgroundColor: 'transparent',
+                            borderWidth: 1.5,
+                            borderDash: [2, 2],
+                            pointBackgroundColor: '#94a3b8',
+                            pointRadius: 2.5,
+                            fill: false,
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { family: 'Pretendard', size: 12 },
+                                usePointStyle: true,
+                                padding: 16
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { family: 'Pretendard', size: 13, weight: 'bold' },
+                            bodyFont: { family: 'Pretendard', size: 12 },
+                            padding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) {
+                                        label += formatInteger(context.parsed.y) + ' 만원';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                font: { family: 'Pretendard' },
+                                callback: function(value) {
+                                    return value.toLocaleString() + '만';
+                                }
+                            },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: {
+                            ticks: { font: { family: 'Pretendard' } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
