@@ -91,9 +91,11 @@
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; } }
         @media print { .calculator-heading { padding-top: 0; } header, #drawerContainer { display: none !important; } }
     </style>
-    <link rel="stylesheet" href="../resource/css/editorial.css?v=20261106-hanwha">
+    <link rel="stylesheet" href="../resource/css/editorial.css?v=20261106-navigation">
 </head>
-<body class="antialiased min-h-screen flex flex-col bg-slate-50 text-slate-700">
+<body id="top" data-page="calculator" class="calculator-page antialiased min-h-screen flex flex-col bg-slate-50 text-slate-700">
+
+    <a class="site-skip" href="#calculator-main">본문으로 바로가기</a>
 
     <!-- 인쇄 전용 헤더 (화면 숨김) -->
     <div class="hidden print:flex items-center justify-between bg-white border border-slate-200 p-6 rounded-2xl mb-6 max-w-[1600px] mx-auto w-full">
@@ -110,35 +112,16 @@
     </div>
 
     <!-- 상단 글로벌 내비게이션 바 (print:hidden) -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm print:hidden">
-        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-            
-            <div class="flex items-center gap-2.5 min-w-0">
-                <a href="../index.html" class="flex items-center gap-2 group flex-shrink-0">
-                    <span class="brand-symbol" aria-hidden="true">w.</span>
-                    <span class="text-lg font-black tracking-tight text-slate-900 group-hover:text-emerald-600 transition-colors">슬기로운 금융생활</span>
-                </a>
-                
-                <div class="flex items-center gap-2 min-w-0">
-                    <svg class="w-4 h-4 text-slate-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                    <span class="text-base font-bold text-slate-800 truncate" id="currentAppTitle">이자 계산기</span>
-                </div>
-            </div>
+    <header class="site-header" data-site-header>
+    <div class="site-shell site-title-row">
+      <a class="site-brand" href="../index.html#top" aria-label="슬기로운금융생활 홈"><span class="site-brand-mark" aria-hidden="true">w.</span><span>슬기로운금융생활<small>WISEMONEY · CONTENT TERMINAL</small></span></a>
+      <a class="site-instagram" href="https://www.instagram.com/wisemoney.toon" target="_blank" rel="noopener noreferrer">Instagram <span aria-hidden="true">↗</span><span class="visually-hidden">(새 창)</span></a>
+    </div>
+    <nav class="content-navigator" aria-label="콘텐츠 내비게이터"><div class="site-shell content-nav-inner"><a href="../index.html#top" data-nav="home">홈</a><a href="../index.html#my-finance" data-nav="finance">내 금융생활</a><a href="../index.html#fp-library" data-nav="library">FP 자료실</a><a href="../app/interest-calculator.html" data-nav="calculator" aria-current="page">이자 계산기</a><a href="../app/advertising-guidelines.html" data-nav="guidelines">이용안내</a></div></nav>
+  </header>
 
-            <div class="flex items-center gap-2">
-                <button type="button" id="menuOpenBtn" aria-label="모든 금융 도구 목록 열기" aria-expanded="false" aria-controls="drawerPanel"
-                    class="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all flex items-center gap-1.5">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                    <span class="text-xs font-semibold hidden sm:inline-block pr-1">모든 도구</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
+    <button type="button" id="menuOpenBtn" class="edge-tool-tab" aria-label="금융 도구함 열기" aria-haspopup="dialog" aria-expanded="false" aria-controls="drawerPanel"><span class="edge-tool-label"><span aria-hidden="true">▦</span> 금융 도구함 <span aria-hidden="true">＋</span></span></button>
+    <span id="currentAppTitle" class="visually-hidden">이자 계산기</span>
     <!-- 우측 오프캔버스 슬라이딩 드로어 메뉴 -->
     <div id="drawerContainer" hidden inert aria-hidden="true" class="fixed inset-0 z-50 pointer-events-none transition-opacity duration-300 ease-in-out opacity-0 print:hidden">
         <div id="drawerBackdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity duration-300"></div>
@@ -233,7 +216,7 @@
     </div>
 
     <!-- 메인 레이아웃 -->
-    <main class="flex-grow max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-7 flex flex-col lg:flex-row items-start gap-7">
+    <main id="calculator-main" class="flex-grow max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-7 flex flex-col lg:flex-row items-start gap-7">
         
         <!-- 좌측 설정 사이드바 (고정 폭 330px ~ 350px) -->
         <aside class="w-full lg:w-[330px] xl:w-[350px] flex-shrink-0 space-y-6">
@@ -459,12 +442,15 @@
     </main>
 
     <!-- 푸터 -->
-    <footer class="bg-white border-t border-slate-200 py-6 mt-12 print:hidden">
-        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-            <p>&copy; WiseMoney. All rights reserved.</p>
-            <p class="text-center sm:text-right">본 시뮬레이터는 세전 기준 계산 결과이며 금융기관별 상품 약관에 따라 실제 수령액과 다를 수 있습니다.</p>
-        </div>
-    </footer>
+    <footer class="site-footer">
+    <div class="site-shell">
+      <div class="site-footer-top"><a class="site-footer-brand" href="../index.html#top">슬기로운금융생활</a><nav class="site-footer-links" aria-label="연락처 및 안내"><a href="../index.html#business-card">전자명함 <span class="footer-status">준비 중</span></a><a href="https://www.instagram.com/wisemoney.toon" target="_blank" rel="noopener noreferrer">인스타그램 ↗<span class="visually-hidden">(새 창)</span></a><a href="mailto:dalhan9art@gmail.com">오류신고 &amp; 제휴문의 <span class="footer-email">dalhan9art@gmail.com</span></a></nav></div>
+      <p class="site-disclaimer">금융정보와 계산 결과는 일반적인 이해를 돕기 위한 참고자료입니다. 특정 금융상품의 가입이나 투자를 권유하지 않으며, 실제 계약조건과 결과는 상품·가입 시점·개인 상황에 따라 달라질 수 있습니다. 이자 계산 결과는 세전 예시이며, 세금·수수료·상품 약관에 따라 실제 수령액과 다를 수 있습니다.</p>
+      <a class="compliance-link" href="../app/advertising-guidelines.html">금융상품 광고 관련 준수사항 안내 <span aria-hidden="true">→</span></a>
+      <p class="compliance-note">관계 법령과 금융광고규제 가이드라인의 주요 확인사항을 안내합니다. 이 안내는 개별 광고의 심의·적법성 확인을 대신하지 않습니다.</p>
+      <div class="site-footer-bottom"><span>WISEMONEY · CONTENT TERMINAL</span><a href="#top">처음으로 ↑</a></div>
+    </div>
+  </footer>
 
     <!-- 자바스크립트 로직 -->
     <script>
@@ -847,5 +833,6 @@
             });
         }
     </script>
+    <script src="../resource/js/navigation.js?v=20261106-navigation" defer></script>
 </body>
 </html>

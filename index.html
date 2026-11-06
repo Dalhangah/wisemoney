@@ -29,15 +29,18 @@
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
     @media print{.site-header{position:static}.tool-tab,.tools-dialog,.tool-callout,.hero-actions{display:none!important}.wrap{width:100%}.hero-main{padding-block:24px}.section{break-inside:avoid}.footer{background:#fff;padding-bottom:0}}
   </style>
-  <link rel="stylesheet" href="./resource/css/editorial.css?v=20261106-hanwha">
+  <link rel="stylesheet" href="./resource/css/editorial.css?v=20261106-navigation">
 </head>
-<body id="top">
+<body id="top" data-page="home">
   <a class="skip" href="#main">본문으로 바로가기</a>
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="external" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L9 15M10 5H5v14h14v-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="tools-icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="17" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 2h8v4H8zM8 10h8m-8 4h2m4 0h2m-8 4h2m4 0h2" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol></svg>
-  <header class="site-header"><div class="wrap header-inner">
-    <a class="brand" href="#top" aria-label="슬기로운금융생활 처음으로"><span class="brand-mark" aria-hidden="true">w.</span><span class="brand-name">슬기로운금융생활<span class="brand-note mono">WISEMONEY · CONTENT TERMINAL</span></span></a>
-    <nav class="top-nav" aria-label="주 메뉴"><a class="nav-section" href="#my-finance">내 금융생활</a><a class="nav-section" href="#fp-library">FP 자료실</a><span class="nav-divider" aria-hidden="true"></span><a href="https://www.instagram.com/wisemoney.toon" target="_blank" rel="noopener noreferrer">Instagram<svg class="small-icon" aria-hidden="true"><use href="#external"/></svg><span class="sr-only">(새 창)</span></a></nav>
-  </div></header>
+  <header class="site-header" data-site-header>
+    <div class="site-shell site-title-row">
+      <a class="site-brand" href="./index.html#top" aria-label="슬기로운금융생활 홈"><span class="site-brand-mark" aria-hidden="true">w.</span><span>슬기로운금융생활<small>WISEMONEY · CONTENT TERMINAL</small></span></a>
+      <a class="site-instagram" href="https://www.instagram.com/wisemoney.toon" target="_blank" rel="noopener noreferrer">Instagram <span aria-hidden="true">↗</span><span class="visually-hidden">(새 창)</span></a>
+    </div>
+    <nav class="content-navigator" aria-label="콘텐츠 내비게이터"><div class="site-shell content-nav-inner"><a href="./index.html#top" data-nav="home" aria-current="page">홈</a><a href="./index.html#my-finance" data-nav="finance">내 금융생활</a><a href="./index.html#fp-library" data-nav="library">FP 자료실</a><a href="./app/interest-calculator.html" data-nav="calculator">이자 계산기</a><a href="./app/advertising-guidelines.html" data-nav="guidelines">이용안내</a></div></nav>
+  </header>
   <main id="main" class="wrap">
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-kicker mono"><span>WISEMONEY / CONTENT TERMINAL</span><span class="edition muted">READ. THINK. USE.</span></div>
@@ -66,8 +69,16 @@
       <!-- Do not substitute a qualification-check URL for an unverified business-card link. -->
     </section>
   </main>
-  <footer class="footer"><div class="wrap"><div class="footer-top"><span class="footer-brand">슬기로운금융생활</span><a class="text-link" href="https://www.instagram.com/wisemoney.toon" target="_blank" rel="noopener noreferrer">@wisemoney.toon<svg class="small-icon" aria-hidden="true"><use href="#external"/></svg><span class="sr-only">(새 창)</span></a></div><p>이 페이지는 금융 콘텐츠와 참고용 도구를 안내하는 공간입니다. 특정 금융상품의 가입이나 투자를 권유하지 않습니다.<br>금융 정보는 게시 시점과 개인의 상황에 따라 적용 내용이 달라질 수 있습니다.</p><div class="footer-bottom"><span class="mono">WISEMONEY · CONTENT TERMINAL</span><a href="#top">처음으로 ↑</a></div></div></footer>
-  <button class="tool-tab" type="button" data-open-tools aria-controls="finance-tools" aria-haspopup="dialog" aria-expanded="false" hidden><svg class="icon" aria-hidden="true"><use href="#tools-icon"/></svg><span>금융 도구함</span><span class="tab-dot" aria-hidden="true"></span></button>
+  <footer class="site-footer">
+    <div class="site-shell">
+      <div class="site-footer-top"><a class="site-footer-brand" href="./index.html#top">슬기로운금융생활</a><nav class="site-footer-links" aria-label="연락처 및 안내"><a href="./index.html#business-card">전자명함 <span class="footer-status">준비 중</span></a><a href="https://www.instagram.com/wisemoney.toon" target="_blank" rel="noopener noreferrer">인스타그램 ↗<span class="visually-hidden">(새 창)</span></a><a href="mailto:dalhan9art@gmail.com">오류신고 &amp; 제휴문의 <span class="footer-email">dalhan9art@gmail.com</span></a></nav></div>
+      <p class="site-disclaimer">금융정보와 계산 결과는 일반적인 이해를 돕기 위한 참고자료입니다. 특정 금융상품의 가입이나 투자를 권유하지 않으며, 실제 계약조건과 결과는 상품·가입 시점·개인 상황에 따라 달라질 수 있습니다. 이자 계산 결과는 세전 예시이며, 세금·수수료·상품 약관에 따라 실제 수령액과 다를 수 있습니다.</p>
+      <a class="compliance-link" href="./app/advertising-guidelines.html">금융상품 광고 관련 준수사항 안내 <span aria-hidden="true">→</span></a>
+      <p class="compliance-note">관계 법령과 금융광고규제 가이드라인의 주요 확인사항을 안내합니다. 이 안내는 개별 광고의 심의·적법성 확인을 대신하지 않습니다.</p>
+      <div class="site-footer-bottom"><span>WISEMONEY · CONTENT TERMINAL</span><a href="#top">처음으로 ↑</a></div>
+    </div>
+  </footer>
+  <button class="tool-tab edge-tool-tab" type="button" data-open-tools aria-controls="finance-tools" aria-haspopup="dialog" aria-expanded="false" hidden><span class="edge-tool-label"><span aria-hidden="true">▦</span> 금융 도구함 <span aria-hidden="true">＋</span></span></button>
   <dialog class="tools-dialog" id="finance-tools" aria-labelledby="tools-title" aria-describedby="tools-intro">
     <div class="drawer-inner"><header class="drawer-header"><div><p class="eyebrow mono">WISEMONEY / TOOLS</p><h2 id="tools-title">금융 도구함</h2></div><button class="close-button" type="button" data-close-tools aria-label="금융 도구함 닫기" autofocus><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button></header><div class="drawer-body"><p class="drawer-intro" id="tools-intro">궁금한 금융생활을 내 숫자로 확인해 보세요.<br>사용 가능한 도구를 선택하면 계산기로 이동합니다.</p><p class="tool-category mono">01 / 저축 · 자산</p><ul class="tool-list"><li><a class="tool-link" href="./app/interest-calculator.html"><span class="tool-heading">이자 계산기<svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></span><span class="tool-description">단리 · 연복리 · 월복리 비교<br>저축 조건에 따른 이자 변화를 살펴보세요.</span><span class="tool-meta"><span class="status status-ready">사용 가능</span><span>계산기 열기 ↗</span></span></a></li><li><button class="tool-disabled" type="button" disabled aria-describedby="pension-status"><span class="tool-heading">연금 갈아타기 분석기</span><span class="tool-description">정확한 계산을 위해 점검 중입니다.</span><span class="tool-meta"><span class="status" id="pension-status">점검 중</span><span>지금은 사용할 수 없습니다</span></span></button></li></ul></div><div class="drawer-note"><strong>계산 전에 확인해 주세요.</strong>계산 결과는 입력 조건에 따른 참고용 예시입니다. 실제 세금, 수수료 및 상품별 조건에 따라 달라질 수 있습니다.</div><div class="drawer-footer"><span class="mono">A LITTLE WISER, EVERY DAY.</span><span>ESC 또는 × 닫기</span></div></div>
   </dialog>
@@ -131,5 +142,6 @@
       window.addEventListener('pageshow', () => { if (!dialog.open) document.body.classList.remove('drawer-open'); });
     })();
   </script>
+  <script src="./resource/js/navigation.js?v=20261106-navigation" defer></script>
 </body>
 </html>
