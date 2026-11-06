@@ -9,9 +9,9 @@
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
         body { 
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; 
+            font-family: 'sans-serif', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; 
             background-color: #f8fafc; 
             color: #334155; 
         }
@@ -30,8 +30,68 @@
         .custom-scrollbar::-webkit-scrollbar { height: 7px; width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #b5b5b5; }
+
+        /* Editorial subpage: preserve the calculator's input / results grid. */
+        :root { --ink: #171717; --accent: #c90000; --line: #dedede; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Noto Sans CJK KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; background: #fff !important; color: var(--ink) !important; }
+        body [class*="rounded"] { border-radius: 2px !important; }
+        body [class*="shadow"] { box-shadow: none !important; }
+        body [class*="border-slate"] { border-color: var(--line) !important; }
+        body [class*="text-slate-9"], body [class*="text-slate-8"], body [class*="text-slate-7"] { color: var(--ink) !important; }
+        body [class*="text-slate-6"], body [class*="text-slate-5"], body [class*="text-slate-4"] { color: #626262 !important; }
+        body [class*="bg-slate-50"], body [class*="bg-slate-100"] { background-color: #f5f5f5 !important; }
+        body [class*="text-emerald"], body [class*="text-amber"], body [class*="text-sky"] { color: var(--ink) !important; }
+        body [class*="bg-emerald-50"], body [class*="bg-amber-50"], body [class*="bg-sky-50"], body [class*="bg-emerald-100"] { background-color: #f5f5f5 !important; }
+        body .border-emerald-500, body .border-l-emerald-500 { border-color: var(--accent) !important; }
+        body [class*="border-l-amber"], body [class*="border-l-slate"] { border-color: var(--line) !important; }
+        body [class*="bg-emerald-600"] { background-color: var(--accent) !important; }
+        body [class*="bg-emerald-600"]:hover { background-color: #a70000 !important; }
+        body :is(a,button,input):focus-visible { outline: 3px solid var(--accent) !important; outline-offset: 3px; box-shadow: none !important; }
+        header { position: relative !important; border-bottom: 1px solid var(--ink) !important; }
+        header > div, main, footer > div { max-width: 1440px !important; }
+        header > div { height: 80px !important; }
+        .brand-symbol { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: var(--accent); color: white; font-size: 20px; font-weight: 900; }
+        .calculator-heading { width: 100%; max-width: 1440px; padding: 48px 32px 0; margin: 0 auto; }
+        .calculator-heading .eyebrow { color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .16em; margin-bottom: 12px; }
+        .calculator-heading h1 { font-size: 36px; font-weight: 900; letter-spacing: -.055em; line-height: 1.25; }
+        .calculator-heading p:last-child { color: #626262; font-size: 13px; margin-top: 12px; line-height: 1.7; }
+        main { padding-top: 32px !important; }
+        main > aside > div:first-child { border-top: 3px solid var(--ink) !important; background: #f5f5f5 !important; }
+        main > aside h2 { font-size: 17px !important; letter-spacing: -.04em; }
+        main > aside h2 > span { display: none; }
+        #interestForm input:not([type="checkbox"]) { background: white; min-height: 42px; font-size: 16px; font-weight: 600; }
+        #interestForm input[type="checkbox"] { accent-color: var(--accent); }
+        #interestForm button { min-height: 48px; }
+        #interestForm button > span { display: none; }
+        main > section > .grid > div { border-left-width: 1px !important; border-top: 3px solid var(--ink) !important; padding: 22px 20px; }
+        main > section > .grid > div:last-child { border-top-color: var(--accent) !important; }
+        #cardMonthlyTotal { color: var(--accent) !important; }
+        #cardDiffNotice { display: inline-block; background: #ffe77a; padding: 2px 4px; margin-top: 6px; }
+        main > section > div > div > h2 { letter-spacing: -.035em; font-weight: 800; }
+        #drawerContainer[hidden] { display: none !important; }
+        #drawerBackdrop { background: rgb(0 0 0 / 40%) !important; }
+        #drawerPanel { border-left: 1px solid var(--ink) !important; }
+        #drawerPanel button[disabled] { width: 100%; text-align: left; cursor: default; background: #f5f5f5; opacity: 1; }
+        #drawerPanel img { border-radius: 50% !important; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f5f5f5; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #a3a3a3; }
+        @media (max-width: 639px) {
+            header > div { height: 68px !important; gap: 8px; }
+            header a > span:last-child { font-size: 15px !important; }
+            header a { gap: 6px !important; }
+            #currentAppTitle { font-size: 12px !important; }
+            .brand-symbol { width: 24px; height: 24px; font-size: 17px; }
+            .calculator-heading { padding: 32px 16px 0; }
+            .calculator-heading h1 { font-size: 30px; }
+            main { padding-top: 24px !important; }
+            main > section > .grid { gap: 12px !important; }
+            main > section > .grid > div { padding: 18px 20px; }
+        }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; } }
+        @media print { .calculator-heading { padding-top: 0; } header, #drawerContainer { display: none !important; } }
     </style>
+    <link rel="stylesheet" href="../resource/css/editorial.css">
 </head>
 <body class="antialiased min-h-screen flex flex-col bg-slate-50 text-slate-700">
 
@@ -55,7 +115,7 @@
             
             <div class="flex items-center gap-2.5 min-w-0">
                 <a href="../index.html" class="flex items-center gap-2 group flex-shrink-0">
-                    <span class="text-2xl transform group-hover:scale-110 transition-transform">💰</span>
+                    <span class="brand-symbol" aria-hidden="true">w.</span>
                     <span class="text-lg font-black tracking-tight text-slate-900 group-hover:text-emerald-600 transition-colors">슬기로운 금융생활</span>
                 </a>
                 
@@ -68,7 +128,7 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <button type="button" id="menuOpenBtn" aria-label="모든 금융 도구 목록 열기" aria-expanded="false"
+                <button type="button" id="menuOpenBtn" aria-label="모든 금융 도구 목록 열기" aria-expanded="false" aria-controls="drawerPanel"
                     class="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all flex items-center gap-1.5">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -80,16 +140,16 @@
     </header>
 
     <!-- 우측 오프캔버스 슬라이딩 드로어 메뉴 -->
-    <div id="drawerContainer" class="fixed inset-0 z-50 pointer-events-none transition-opacity duration-300 ease-in-out opacity-0 print:hidden">
+    <div id="drawerContainer" hidden inert aria-hidden="true" class="fixed inset-0 z-50 pointer-events-none transition-opacity duration-300 ease-in-out opacity-0 print:hidden">
         <div id="drawerBackdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity duration-300"></div>
 
-        <aside id="drawerPanel" 
+        <aside id="drawerPanel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" tabindex="-1" 
             class="absolute top-0 right-0 w-full max-w-sm sm:max-w-md h-full bg-white shadow-2xl border-l border-slate-200 flex flex-col transform translate-x-full transition-transform duration-300 ease-out pointer-events-auto">
             
             <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
                 <div class="flex items-center gap-2">
                     <span class="text-xl">🧰</span>
-                    <h2 class="text-lg font-bold text-slate-800">WiseMoney 금융 도구함</h2>
+                    <h2 id="drawerTitle" class="text-lg font-bold text-slate-800">WiseMoney 금융 도구함</h2>
                 </div>
                 <button type="button" id="menuCloseBtn" aria-label="메뉴 닫기"
                     class="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
@@ -129,7 +189,7 @@
                     </div>
                     <ul class="space-y-2">
                         <li>
-                            <a href="#" 
+                            <button type="button" disabled aria-disabled="true" 
                                class="flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 transition-all group">
                                 <div class="flex items-center gap-3 min-w-0">
                                     <span class="p-2 rounded-lg bg-slate-100 group-hover:bg-slate-200 text-slate-600 text-sm">📊</span>
@@ -142,7 +202,7 @@
                                 <!--svg class="w-4 h-4 text-slate-300 group-hover:text-slate-500 flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg-->
-                            </a>
+                            </button>
                         </li>
                     </ul>
                 </section>
@@ -164,6 +224,12 @@
                 </a>
             </div>
         </aside>
+    </div>
+
+    <div class="calculator-heading">
+        <p class="eyebrow">01 / MONEY TOOLS</p>
+        <h1>이자 계산기<span style="color: #c90000">.</span></h1>
+        <p>단리 · 년복리 · 월복리, 같은 저축을 다른 방식으로 비교해보세요.</p>
     </div>
 
     <!-- 메인 레이아웃 -->
@@ -334,7 +400,7 @@
             <!-- 자산 추이 그래프 -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
                 <div class="mb-3">
-                    <h2 class="text-base font-bold text-slate-800">📈 이자 계산 방식별 총 누적액 추이 비교</h2>
+                    <h2 class="text-base font-bold text-slate-800">이자 계산 방식별 총 누적액 추이 비교</h2>
                     <p class="text-xs text-slate-500">시간이 지날수록 단리, 년복리, 월복리 간에 벌어지는 자산 격차를 확인하세요.</p>
                 </div>
                 <div class="chart-container">
@@ -345,7 +411,7 @@
             <!-- 연도별 상세 데이터 테이블 -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
                 <div class="mb-4">
-                    <h2 class="text-base font-bold text-slate-800">📄 연도별 상세 적립 및 이자 명세표</h2>
+                    <h2 class="text-base font-bold text-slate-800">연도별 상세 적립 및 이자 명세표</h2>
                     <p class="text-xs text-slate-400 mt-0.5">
                         * 금년 이자는 소수점 1자리(고정), 누적 이자와 총액은 정수(반올림)로 표시됩니다. (단위: 만원)
                     </p>
@@ -456,37 +522,63 @@
             const drawerBackdrop = document.getElementById('drawerBackdrop');
             const drawerPanel = document.getElementById('drawerPanel');
 
+            let previousFocus = null;
+            let backgroundState = [];
+            let previousOverflow = '';
             const openDrawer = () => {
+                if (!drawerContainer.hidden) return;
+                previousFocus = document.activeElement;
+                previousOverflow = document.body.style.overflow;
+                drawerContainer.hidden = false;
+                drawerContainer.inert = false;
+                drawerContainer.removeAttribute('aria-hidden');
                 drawerContainer.classList.remove('pointer-events-none', 'opacity-0');
                 drawerContainer.classList.add('pointer-events-auto', 'opacity-100');
                 drawerPanel.classList.remove('translate-x-full');
                 drawerPanel.classList.add('translate-x-0');
                 menuOpenBtn.setAttribute('aria-expanded', 'true');
-                document.body.classList.add('overflow-hidden');
+                menuCloseBtn.focus();
+                backgroundState = Array.from(document.body.children)
+                    .filter(el => el !== drawerContainer && !['SCRIPT', 'STYLE'].includes(el.tagName))
+                    .map(el => [el, el.inert]);
+                backgroundState.forEach(([el]) => { el.inert = true; });
+                document.body.style.overflow = 'hidden';
             };
 
             const closeDrawer = () => {
+                if (drawerContainer.hidden) return;
+                backgroundState.forEach(([el, wasInert]) => { el.inert = wasInert; });
+                backgroundState = [];
+                document.body.style.overflow = previousOverflow;
+                menuOpenBtn.setAttribute('aria-expanded', 'false');
+                if (previousFocus && previousFocus.isConnected) previousFocus.focus();
+                else menuOpenBtn.focus();
+                drawerContainer.inert = true;
+                drawerContainer.hidden = true;
+                drawerContainer.setAttribute('aria-hidden', 'true');
                 drawerPanel.classList.remove('translate-x-0');
                 drawerPanel.classList.add('translate-x-full');
-                drawerContainer.classList.remove('opacity-100');
-                drawerContainer.classList.add('opacity-0');
-
-                setTimeout(() => {
-                    drawerContainer.classList.remove('pointer-events-auto');
-                    drawerContainer.classList.add('pointer-events-none');
-                }, 300);
-
-                menuOpenBtn.setAttribute('aria-expanded', 'false');
-                document.body.classList.remove('overflow-hidden');
+                drawerContainer.classList.remove('pointer-events-auto', 'opacity-100');
+                drawerContainer.classList.add('pointer-events-none', 'opacity-0');
             };
 
             menuOpenBtn.addEventListener('click', openDrawer);
             menuCloseBtn.addEventListener('click', closeDrawer);
             drawerBackdrop.addEventListener('click', closeDrawer);
-
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && menuOpenBtn.getAttribute('aria-expanded') === 'true') {
-                    closeDrawer();
+                if (drawerContainer.hidden) return;
+                if (e.key === 'Escape') { e.preventDefault(); closeDrawer(); }
+                if (e.key === 'Tab') {
+                    const focusable = Array.from(drawerPanel.querySelectorAll('a[href], button:not([disabled]), [tabindex="0"]'))
+                        .filter(el => el.getClientRects().length);
+                    const first = focusable[0];
+                    const last = focusable[focusable.length - 1];
+                    if (!first) { e.preventDefault(); drawerPanel.focus(); }
+                    else if (e.shiftKey && (document.activeElement === first || document.activeElement === drawerPanel)) {
+                        e.preventDefault(); last.focus();
+                    } else if (!e.shiftKey && document.activeElement === last) {
+                        e.preventDefault(); first.focus();
+                    }
                 }
             });
         }
@@ -641,10 +733,10 @@
                         {
                             label: '월복리 총액',
                             data: monthlyData,
-                            borderColor: '#059669',
-                            backgroundColor: 'rgba(5, 150, 105, 0.08)',
+                            borderColor: '#c90000',
+                            backgroundColor: 'rgba(201, 0, 0, 0.04)',
                             borderWidth: 2.5,
-                            pointBackgroundColor: '#059669',
+                            pointBackgroundColor: '#c90000',
                             pointRadius: 4,
                             fill: true,
                             tension: 0.2
@@ -652,11 +744,11 @@
                         {
                             label: '년복리 총액',
                             data: annualData,
-                            borderColor: '#0284c7',
+                            borderColor: '#171717',
                             backgroundColor: 'transparent',
                             borderWidth: 2,
                             borderDash: [4, 4],
-                            pointBackgroundColor: '#0284c7',
+                            pointBackgroundColor: '#171717',
                             pointRadius: 3.5,
                             fill: false,
                             tension: 0.2
@@ -664,10 +756,10 @@
                         {
                             label: '단리 총액',
                             data: simpleData,
-                            borderColor: '#d97706',
+                            borderColor: '#737373',
                             backgroundColor: 'transparent',
                             borderWidth: 2,
-                            pointBackgroundColor: '#d97706',
+                            pointBackgroundColor: '#737373',
                             pointRadius: 3.5,
                             fill: false,
                             tension: 0.2
@@ -675,11 +767,11 @@
                         {
                             label: '순수 납입원금',
                             data: principalData,
-                            borderColor: '#94a3b8',
+                            borderColor: '#b5b5b5',
                             backgroundColor: 'transparent',
                             borderWidth: 1.5,
                             borderDash: [2, 2],
-                            pointBackgroundColor: '#94a3b8',
+                            pointBackgroundColor: '#b5b5b5',
                             pointRadius: 2.5,
                             fill: false,
                             tension: 0
@@ -697,15 +789,15 @@
                         legend: {
                             position: 'top',
                             labels: {
-                                font: { family: 'Pretendard', size: 12 },
+                                font: { family: 'sans-serif', size: 12 },
                                 usePointStyle: true,
                                 padding: 16
                             }
                         },
                         tooltip: {
                             backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                            titleFont: { family: 'Pretendard', size: 13, weight: 'bold' },
-                            bodyFont: { family: 'Pretendard', size: 12 },
+                            titleFont: { family: 'sans-serif', size: 13, weight: 'bold' },
+                            bodyFont: { family: 'sans-serif', size: 12 },
                             padding: 10,
                             callbacks: {
                                 label: function(context) {
@@ -723,7 +815,7 @@
                         y: {
                             beginAtZero: false,
                             ticks: {
-                                font: { family: 'Pretendard' },
+                                font: { family: 'sans-serif' },
                                 callback: function(value) {
                                     return value.toLocaleString() + '만';
                                 }
@@ -731,7 +823,7 @@
                             grid: { color: '#f1f5f9' }
                         },
                         x: {
-                            ticks: { font: { family: 'Pretendard' } },
+                            ticks: { font: { family: 'sans-serif' } },
                             grid: { display: false }
                         }
                     }

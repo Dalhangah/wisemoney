@@ -1,0 +1,10 @@
+WiseMoney Display Subset
+
+This is a character subset of Cafe24 Ohsquare v2.0, renamed for this website. Glyph outlines are unchanged. Characters not present in this subset use the CSS system-font fallback.
+
+Original font: Cafe24 Ohsquare (카페24 아네모네)
+Publisher: Cafe24
+Copyright (c) 2020by Cafe24. All rights reserved.
+Source: https://fonts.cafe24.com/
+Original package: https://img.cafe24.com/csdstatic/freefonts/download/kr/Cafe24Ohsquare-v2.0.zip
+License: SIL Open Font License 1.1. See OFL-1.1.txt and LICENSE-Cafe24Ohsquare.txt in this directory.
