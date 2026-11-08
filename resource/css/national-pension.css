@@ -4,3 +4,12 @@
 @media(max-width:780px){.np-shell{width:calc(100% - 36px)}.np-intro{padding-top:26px}.np-title-line{margin-top:16px}.np-title-line h1{font-size:35px}.np-stamp{display:none}.np-title-line p{font-size:13px}.np-notice{font-size:12px;padding:15px;margin-bottom:25px}.np-notice strong{font-size:14px}.np-workspace{grid-template-columns:1fr;gap:32px}.np-inputs{padding:19px}.np-result-head h2{font-size:28px}.np-target-grid{grid-template-columns:1fr 1fr}.np-target-item+.np-target-item{border-top:0;border-left:1px solid #ddd;padding:0 0 0 12px}.np-sources{grid-template-columns:1fr}.np-method{margin-top:38px}.np-method h2{font-size:24px}.np-empty{padding:30px 0}.np-result-head{scroll-margin-top:140px}}
 @media(max-width:360px){.np-pair{grid-template-columns:1fr}.np-shell{width:calc(100% - 28px)}.np-pair{gap:8px}.np-title-line h1{font-size:31px}.np-target-grid{grid-template-columns:1fr}.np-target-item+.np-target-item{border-left:0;border-top:1px solid #ddd;padding:12px 0 0}.np-history-row{gap:5px}.np-inputs{padding:16px}}
 @media print{.site-header,.np-inputs,.np-footer,.np-notice{display:none!important}.np-workspace{display:block}.np-shell{width:100%}.np-table-wrap{overflow:visible}.np-table{min-width:0}.np-intro{padding-top:0}.np-title-line h1{font-size:28px}.np-method{break-before:page}.np-target-card{break-inside:avoid}}
+/* Simple total-premium form v0.2. Scoped to the current calculator. */
+body:has(#history-details) .np-pair{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+body:has(#history-details) .np-pair>*{min-width:0}
+body:has(#history-details) .np-history-row{grid-template-columns:minmax(0,1fr) minmax(0,.65fr) minmax(0,1.5fr) 34px;gap:6px}
+body:has(#history-details) .np-history-row label{min-width:0}
+body:has(#history-details) .np-history-row input{padding:8px 5px}
+body:has(#history-details) .np-eligibility{margin:0 0 22px;border-top:1px solid #ddd;padding-top:16px}
+body:has(#history-details) input[readonly]{background:#f4f4f4;color:#555}
+@media(max-width:360px){body:has(#history-details) .np-pair{grid-template-columns:minmax(0,1fr)}body:has(#history-details) .np-history-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px}body:has(#history-details) .np-history-row label:nth-child(3){grid-column:1 / 3}body:has(#history-details) .np-remove{grid-column:3;grid-row:2}}
