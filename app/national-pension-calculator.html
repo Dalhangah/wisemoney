@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#ffffff">
-  <title>국민연금 시나리오 계산기 | 슬기로운금융생활</title>
-  <meta name="description" content="가입 이력과 미래 납부 계획으로 국민연금 조기·정상·연기 수령 및 생활비 부족액을 비교하는 참고용 계산기.">
+  <title>국민연금 계산기 | 슬기로운금융생활</title>
+  <meta name="description" content="지금까지 낸 국민연금과 앞으로 낼 돈을 입력하고, 연금을 언제 얼마나 받을지 비교해 보세요. 참고용 계산기입니다.">
   <link rel="canonical" href="https://dalhangah.github.io/wisemoney/app/national-pension-calculator.html">
   <link rel="stylesheet" href="../resource/css/editorial.css?v=20261106-navigation">
-  <link rel="stylesheet" href="../resource/css/national-pension.css?v=20261108-v02">
+  <link rel="stylesheet" href="../resource/css/national-pension.css?v=20261109-v03">
   <script src="../resource/js/navigation.js?v=20261106-navigation" defer></script>
-  <script src="../resource/js/national-pension-engine.js?v=20261108-v02" defer></script>
-  <script src="../resource/js/national-pension-ui.js?v=20261108-v02" defer></script>
+  <script src="../resource/js/national-pension-engine.js?v=20261109-v03" defer></script>
+  <script src="../resource/js/national-pension-ui.js?v=20261109-v03" defer></script>
 </head>
 <body data-page="national-pension">
 <a class="np-skip" href="#main">본문으로 바로가기</a>
@@ -19,23 +19,123 @@
   <nav class="content-navigator" aria-label="콘텐츠 내비게이터"><div class="site-shell content-nav-inner"><a href="../index.html#top" data-nav="home">홈</a><a href="../index.html#my-finance" data-nav="finance">내 금융생활</a><a href="../index.html#fp-library" data-nav="library">FP 자료실</a><a href="./interest-calculator.html" data-nav="calculator">이자 계산기</a><a href="./national-pension-calculator.html" data-nav="national-pension" aria-current="page">국민연금</a><a href="./advertising-guidelines.html" data-nav="guidelines">이용안내</a></div></nav>
 </header>
 <main class="np-shell" id="main">
-  <section class="np-intro"><p class="np-kicker">FINANCIAL TOOLBOX / 02</p><div class="np-title-line"><div><h1>내 국민연금,<br>언제 얼마나 받을까?</h1><p>과거 총 납부액과 앞으로의 계획만 입력하세요.<br>자세한 연도별 기록은 아는 만큼만 더할 수 있어요.</p></div><span class="np-stamp">국민연금<br>시나리오 계산기<small>RULES CHECKED 2026.11.08</small></span></div></section>
-  <aside class="np-notice"><strong>간편 추정 v0.2 · 실제 예상연금과는 다릅니다.</strong><p>총 보험료에서 과거 소득을 역산하는 단순모형입니다. <b>과거 소득은 재평가하지 않은 명목 추정치이며, 법정 B값이나 2026년 구매력이 아닙니다.</b> 결과는 재평가·법정 연금액 최고한도 적용 전의 참고값입니다.</p><p>보험료는 모두 <b>사업주 부담을 포함한 총액</b>으로 입력하세요. <a href="./national-pension-calculator%20VR.0.1.html">이전 상세 계산기 VR.0.1 보기 →</a></p></aside>
-  <noscript><p class="np-error">계산하려면 JavaScript가 필요합니다. 아래 산정 기준과 공식 출처는 그대로 읽을 수 있습니다.</p></noscript>
+  <section class="np-intro">
+    <p class="np-kicker">FINANCIAL TOOLBOX / 02</p>
+    <div class="np-title-line"><div><h1>내 국민연금,<br>언제 얼마나 받을까?</h1><p>지금까지 낸 돈과 앞으로 낼 돈을 입력하세요.<br>연금을 받는 시기에 따라 얼마나 달라지는지 볼 수 있어요.</p></div><span class="np-stamp">내 국민연금<br>쉽게 비교하기<small>간편 계산 v0.3</small></span></div>
+  </section>
+  <p class="np-brief-notice">참고용 계산입니다.</p>
+  <noscript><p class="np-error">계산하려면 브라우저에서 JavaScript를 켜 주세요.</p></noscript>
   <div class="np-workspace">
     <form id="pension-form" class="np-inputs">
-      <div class="np-form-top"><h2>나의 조건</h2><button type="button" id="demo-button" class="np-text-button">가상 예시 불러오기</button></div>
-      <fieldset><legend><span>01</span> 생년월과 현재 나이</legend><label>생년월<input type="month" id="birth" required aria-describedby="birth-help"></label><label>계산 기준월 <small>2026년 기준 고정</small><input type="month" id="asOf" value="2026-11" readonly></label><p class="np-help" id="birth-help">과거 납부는 2026년 10월까지, 미래 납부는 2026년 11월부터 계산합니다. 실제 첫 지급월은 생일·청구일에 따라 달라집니다.</p><p id="age-hint" class="np-inline-info">생년월을 입력하면 정상 수급연령을 확인할 수 있습니다.</p></fieldset>
-      <fieldset><legend><span>02</span> 과거 납부 총합</legend><div class="np-pair"><label>총 가입기간 <small>개월</small><input type="number" id="pastMonths" value="0" min="0" max="600" step="1" required></label><label>총 납부보험료 <small>원 · 사업주 포함</small><input type="number" id="pastPaid" value="0" min="0" max="10000000000" step="1" required></label></div><p class="np-help">본인 부담액만이 아닌 전체 보험료를 입력하세요. 아래 연도별 상세는 이 총합에 <b>포함된 일부</b>이며, 추가로 더하지 않습니다.</p>
-      <details class="np-details" id="history-details"><summary>선택: 알고 있는 연도별 납부 기록</summary><p class="np-help">연도·개월·해당 연도 총 보험료를 함께 입력하세요. 모르는 연도는 만들지 않아도 됩니다. 추가한 빈 행은 모두 채우거나 삭제하세요.</p><div class="np-history-head"><h3>연도별 상세</h3><button type="button" id="add-year" class="np-text-button">＋ 연도 추가</button></div><div id="history-rows"></div></details><p id="history-total" class="np-inline-info" aria-live="polite"></p><p class="np-help">기록 없는 나머지 개월은 최근부터 거꾸로 연속 가입한 것으로 배치하고, 남은 총액을 월마다 똑같이 나눕니다. 입력한 상세는 총 개월·총액과 해당 연도의 남은 개월에서 먼저 제외합니다.</p></fieldset>
-      <fieldset><legend><span>03</span> 앞으로의 납부 계획</legend><div class="np-pair"><label>예정 기간 <small>개월</small><input type="number" id="futureMonths" value="120" min="0" max="600" step="1" required></label><label>월 총 보험료 <small>원 · 사업주 포함</small><input type="number" id="premium" value="300000" min="0" max="10000000" step="1" required></label></div><p class="np-help">이 모형은 미래 보험료율을 <b>9.5%로 고정</b>합니다. 실제 법정 보험료율은 2027~2033년 매년 0.5%p씩 올라 13%가 됩니다.</p></fieldset>
-      <fieldset><legend><span>04</span> 전체 가입자 평균소득 A값</legend><label>A값 <small>원/월</small><input type="number" id="A" value="3193511" min="1" max="100000000" step="1" required></label><p class="np-help">내 소득이 아니라 전체 가입자의 수급 전 3년 평균소득월액 평균입니다. 기본값 3,193,511원은 2025.12~2026.11 지급사유 발생 기준입니다. 미래 A값은 미정입니다.</p></fieldset>
-      <fieldset><legend><span>05</span> 월 생활비 목표</legend><div class="np-pair"><label>최소 생활비 <small>원/월</small><input type="number" id="targetMin" value="2000000" min="0" max="100000000" step="1" required></label><label>최대 생활비 <small>원/월</small><input type="number" id="targetMax" value="3000000" min="0" max="100000000" step="1" required></label></div><p class="np-help">결과와 생활비의 단순 금액 비교입니다. 물가·과거 소득 재평가를 반영하지 않아 실제 미래 생활비 충족 여부를 뜻하지 않습니다.</p></fieldset>
-      <details class="np-details np-eligibility"><summary>선택: 60세 이후 가입·조기 수령 조건</summary><label class="np-check"><input type="checkbox" id="continueTo65">60세 이후 임의계속가입 요건 충족을 가정</label><p class="np-help">기본은 60세까지. 선택 시 최대 65세·연금 개시 전까지 반영합니다. 실제 가입 가능 여부는 별도 확인이 필요합니다.</p><label>조기연금 개시 시 소득요건<select id="earlyEligible"><option value="unknown">아직 확인하지 않음</option><option value="yes">소득요건을 충족한다고 가정</option><option value="no">소득요건을 충족하지 않음</option></select></label><p class="np-help">가입기간 120개월 이상이며 소득 있는 업무에 종사하지 않아야 합니다. 공단 기준 월평균 사업·근로소득금액이 해당 연도 A값 이하여야 하며 세전 월급과는 다릅니다. 정상연령 전 요건을 벗어나면 지급이 정지될 수 있습니다.</p></details>
-      <div id="form-error" class="np-error" role="alert" hidden></div><button class="np-primary" type="submit">수령 시나리오 비교하기 <span aria-hidden="true">↗</span></button><button type="button" id="reset-button" class="np-text-button np-reset">입력 초기화</button><p class="np-privacy">입력 내용은 브라우저 안에서만 계산하며 저장하거나 전송하지 않습니다.</p>
+      <div class="np-form-top"><h2>내 정보 입력</h2><button type="button" id="demo-button" class="np-text-button">예시로 계산해 보기</button></div>
+      <fieldset>
+        <legend><span>01</span> 태어난 해와 달</legend>
+        <label>태어난 해와 달<input type="month" id="birth" required aria-describedby="birth-help age-hint"></label>
+        <label>계산하는 때 <small>2026년 11월로 고정</small><input type="month" id="asOf" value="2026-11" readonly></label>
+        <p class="np-help" id="birth-help">지금까지 낸 돈은 2026년 10월까지, 앞으로 낼 돈은 2026년 11월부터 입력하세요.</p>
+        <p id="age-hint" class="np-inline-info">태어난 해와 달을 입력하면 연금 받는 나이를 알려 드려요.</p>
+      </fieldset>
+      <fieldset>
+        <legend><span>02</span> 지금까지 낸 국민연금</legend>
+        <div class="np-pair"><label>총 가입기간 <small>개월</small><input type="number" id="pastMonths" value="0" min="0" max="600" step="1" required></label><label>지금까지 낸 총 보험료 <small>원</small><input type="number" id="pastPaid" value="0" min="0" max="10000000000" step="1" required aria-describedby="past-paid-help"></label></div>
+        <p class="np-help" id="past-paid-help">직장에 다녔다면 <b>회사에서 내 준 돈까지 합쳐서</b> 입력하세요.</p>
+        <details class="np-details" id="history-details">
+          <summary>선택: 어느 해에 냈는지 알고 있어요</summary>
+          <p class="np-help">위 총합에 <b>이미 들어 있는 기록</b>만 적어 주세요. 두 번 더하지 않아요. 아는 해만 추가해 주세요. 추가한 줄은 모두 채우거나 ×로 지워 주세요.</p>
+          <div class="np-history-head"><h3>해마다 낸 돈</h3><button type="button" id="add-year" class="np-text-button">＋ 연도 추가</button></div>
+          <div id="history-rows"></div>
+          <p id="history-total" class="np-inline-info" aria-live="polite"></p>
+        </details>
+      </fieldset>
+      <fieldset>
+        <legend><span>03</span> 앞으로 낼 국민연금</legend>
+        <div class="np-pair"><label>앞으로 낼 기간 <small>개월</small><input type="number" id="futureMonths" value="120" min="0" max="600" step="1" required></label><label>매달 낼 총 보험료 <small>원</small><input type="number" id="premium" value="300000" min="0" max="10000000" step="1" required aria-describedby="future-paid-help"></label></div>
+        <p class="np-help" id="future-paid-help">직장가입자라면 <b>회사에서 내 주는 돈까지 합쳐서</b> 입력하세요.</p>
+      </fieldset>
+      <fieldset>
+        <legend><span>04</span> 한 달에 필요한 생활비</legend>
+        <div class="np-pair"><label>최소 생활비 <small>원/월</small><input type="number" id="targetMin" value="2000000" min="0" max="100000000" step="1" required></label><label>최대 생활비 <small>원/월</small><input type="number" id="targetMax" value="3000000" min="0" max="100000000" step="1" required></label></div>
+      </fieldset>
+      <details class="np-details np-eligibility">
+        <summary>선택: 60세 이후 납부 · 일찍 받기</summary>
+        <label class="np-check"><input type="checkbox" id="continueTo65">60세가 지나도 계속 낼 수 있다고 가정하기</label>
+        <p class="np-help">선택하지 않으면 60세까지, 선택하면 최대 65세까지 계산해요. 연금 받기 전까지만 낼 수 있어요.</p>
+        <label>5년 일찍 받을 때 소득 조건<select id="earlyEligible"><option value="unknown">아직 확인하지 않았어요</option><option value="yes">소득 조건을 갖췄다고 가정할게요</option><option value="no">소득 조건을 갖추지 못했어요</option></select></label>
+        <p class="np-help">조건을 갖췄다고 선택하면 ‘5년 일찍 받기’도 계산해요. 조건 설명은 결과 아래에 있어요.</p>
+      </details>
+      <div id="form-error" class="np-error" role="alert" hidden></div>
+      <button class="np-primary" type="submit">언제 얼마나 받을지 보기 <span aria-hidden="true">↗</span></button>
+      <button type="button" id="reset-button" class="np-text-button np-reset">처음부터 다시 입력</button>
+      <p class="np-privacy">입력한 정보는 이 브라우저에서만 계산해요.<br>따로 저장하거나 다른 곳으로 보내지 않아요.</p>
     </form>
-    <section class="np-results" aria-labelledby="result-title"><div class="np-result-head"><p class="np-kicker">YOUR RETIREMENT SCENARIOS</p><h2 id="result-title" tabindex="-1">수령 시점 비교</h2><p>빨리 받기, 제때 받기, 나중에 받기.<br>월 생활비를 기준으로 비교해 보세요.</p></div><div id="results" aria-live="polite"><div class="np-empty"><span aria-hidden="true">↙</span><h3>먼저 내 조건을 입력해 주세요.</h3><p>과거 총합부터 시작해 보세요.<br>가상 예시로 계산 구조를 살펴볼 수도 있습니다.</p></div></div><div class="np-permanent-notes"><h3>숫자를 읽기 전에</h3><ul><li>연금은 적립금 인출이 아닙니다. 납부 총액만큼 비례해서 돌려받는 구조가 아닙니다.</li><li>생활비 차이는 <b>세전 월액 비교</b>입니다. 세금·건강보험료·다른 연금·배우자 소득은 제외됩니다.</li><li>정상연금의 소득활동 감액, 부양가족연금, 크레딧, 특례는 반영하지 않습니다.</li><li>5년 연기는 정상 시나리오와 <b>같은 납부 이력</b>으로 전액 연기만 비교합니다. 연기 중 추가 납부나 부분 연기는 제외됩니다.</li><li>5년 조기는 70%, 5년 연기는 136%입니다. 이는 동일 연금 기준의 배율이며, 조기 납부 종료로 가입기간 자체도 짧아질 수 있습니다.</li></ul></div></section>
+    <section class="np-results" aria-labelledby="result-title">
+      <div class="np-result-head"><p class="np-kicker">MY PENSION</p><h2 id="result-title" tabindex="-1">받는 시기 비교</h2><p>5년 일찍, 정해진 나이에, 5년 늦게.<br>받는 돈과 모자란 생활비를 비교해 보세요.</p></div>
+      <div id="results" aria-live="polite"><div class="np-empty"><span aria-hidden="true">↙</span><h3>먼저 내 정보를 입력해 주세요.</h3><p>‘예시로 계산해 보기’를 눌러<br>어떻게 나오는지 먼저 볼 수도 있어요.</p></div></div>
+      <section class="np-method np-result-method" id="calculation-notes" aria-labelledby="method-title" hidden>
+        <h3 id="method-title">계산에 쓴 기준과 알아둘 점</h3>
+        <div class="np-a-basis">
+          <p><strong><span id="a-basis-year"></span>년 A값 <span id="a-basis-amount"></span>을 기준으로 계산했어요.</strong></p>
+          <p>A값은 <b>국민연금 가입자들의 최근 3년 평균 월소득을 바탕으로 정한 공통 금액</b>이에요. 내 월급이 아니에요. 국민연금공단이 발표한 값을 계산기에 미리 넣어 두었어요.</p>
+          <p class="np-help">앞으로 받을 연금도 이 A값으로 계산했어요. 실제로 연금을 받을 때의 A값은 아직 몰라요.</p>
+          <p class="np-help">과거 소득을 현재 가치로 바꾸는 재평가와 법정 연금 최고한도는 반영하지 않았어요.</p>
+          <a id="a-basis-source" href="https://www.nps.or.kr/comm/quick/getOHAH0011P0.do" target="_blank" rel="noopener noreferrer">국민연금공단 A값 자료 보기 ↗</a>
+        </div>
+        <div id="record-explanation"></div>
+        <details>
+          <summary>A값은 언제 쓰는 금액인가요?</summary>
+          <p>공식 적용 기간: <span id="a-basis-period"></span>에 쓰는 금액이에요. 단순히 그 기간에 연금을 지급받는 모든 사람에게 같은 A값을 쓴다는 뜻은 아니에요.</p>
+          <p>A값은 해마다 달라질 수 있어요. 이 계산에서는 입력한 사람과 연금 받는 시기에 관계없이 위의 공통 금액을 써요.</p>
+          <p><a id="a-period-source" href="https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0048M0.do" target="_blank" rel="noopener noreferrer">국민연금공단 적용 기간 안내 ↗</a></p>
+        </details>
+        <details>
+          <summary>계산한 돈과 실제로 받는 돈은 달라요</summary>
+          <p>이 결과는 국민연금공단의 공식 예상액이 아니에요. 연금은 낸 돈을 그대로 모았다가 돌려주는 방식도 아니에요.</p>
+          <p>옛날 소득을 지금 가치로 바꾸는 <b>‘재평가’</b>를 하지 않았어요. 당시 금액 그대로인 <b>‘명목 금액’</b>으로 추정해요. 법에서 정한 개인 평균소득인 B값이나, 2026년 돈의 가치로 바꾼 결과가 아니에요.</p>
+          <p><b>세금과 건강보험료를 빼기 전 금액</b>이에요. 법으로 정한 연금액의 최고한도도 적용하지 않았어요. 실제 최고한도는 별도 소득자료로 확인해야 해요.</p>
+          <p>일하면서 소득이 있을 때 연금이 줄어드는 규칙, 가족에 따라 더 받는 연금, 출산·군복무 등의 추가 가입기간(크레딧), 특별한 예외는 계산하지 않았어요. 다른 연금과 배우자 소득도 포함하지 않았어요.</p>
+          <p>생활비와는 금액만 비교했어요. 물가 변화를 반영하지 않아, 결과가 목표보다 높아도 나중에 생활비가 충분하다는 뜻은 아니에요.</p>
+        </details>
+        <details>
+          <summary>언제 냈는지 모르는 기록은 이렇게 채웠어요</summary>
+          <p>알고 있는 연도별 기록은 총 가입기간과 총 납부액에 이미 들어 있는 것으로 봐요. 먼저 빼 놓고, 남은 기간과 돈만 계산해요.</p>
+          <p>모르는 기간은 2026년 10월부터 과거로 거슬러 올라가며, 중간에 쉬지 않고 낸 것으로 채워요. 남은 돈도 매달 똑같이 나눠요. <b>계산을 위한 가정이며, 실제 납부 기록을 찾아낸 것은 아니에요.</b></p>
+          <p>예전 소득은 직장가입자의 보험료율로 거꾸로 계산해요. 1988~1992년 3%, 1993~1997년 6%, 1998~2025년 9%, 2026년 9.5%를 써요. <b>2005년 7월 전에 지역가입자로 낸 적이 있다면</b> 실제 보험료율과 달라 오차가 클 수 있어요.</p>
+          <p>이 계산기는 만 18세 이후 기록만 다뤄요. 더 어릴 때 가입한 기록이나 추가로 인정받는 가입기간은 공단에 확인해 주세요.</p>
+        </details>
+        <details>
+          <summary>앞으로 낼 돈과 추가액은 이렇게 계산했어요</summary>
+          <p><b>앞으로의 보험료율은 9.5%로 고정했어요.</b> 실제 법은 2027년부터 2033년까지 해마다 0.5%포인트씩 올라 13%가 돼요. 이 인상은 현재 계산에 넣지 않았어요.</p>
+          <p>보험료를 계산할 때 쓰는 소득 범위도 2026년 7월~2027년 6월 기준인 월 41만~659만원으로 고정했어요. 이후 실제 범위는 달라질 수 있어요.</p>
+          <p>추가액은 <b>앞으로 낼 개월 수를 그대로 두고, 매달 내는 총 보험료를 늘린다면</b> 목표에 얼마나 가까워지는지 계산한 값이에요. 회사 부담분이 있는 경우 그 돈도 포함해요.</p>
+          <p><b>원하는 돈을 마음대로 더 내서 연금을 살 수 있다는 뜻은 아니에요.</b> 실제 소득과 가입 조건에 맞아야 해요. 예전에 못 낸 돈을 나중에 내는 추후납부, 반납금, 밀린 보험료는 계산하지 않아요.</p>
+        </details>
+        <details>
+          <summary>연금을 받으려면 어떤 조건이 필요한가요?</summary>
+          <p>매달 노령연금을 받으려면 보통 <b>가입기간이 10년(120개월) 이상</b>이어야 해요. 10년이 안 되면 보험료만 많이 낸다고 조건이 채워지지 않아요.</p>
+          <p>이 계산은 기본적으로 60세까지 내는 것으로 봐요. ‘60세가 지나도 계속 낼 수 있다고 가정하기’를 선택하면 최대 65세와 연금 받기 전 중 빠른 때까지 계산해요. 실제 임의계속가입이 가능한지는 공단에 확인해야 해요.</p>
+          <p>연금을 일찍 받으려면 가입기간 외에 소득 조건도 맞아야 해요. 공단 기준으로 계산한 월평균 사업·근로소득금액이 그해 A값 이하여야 해요. <b>세전 월급과는 다른 기준</b>이에요. 정해진 나이가 되기 전에 소득 조건을 벗어나면 지급이 멈출 수 있어요.</p>
+          <p>정해진 나이에 받는 경우와 5년 늦게 받는 경우는 같은 납부 기록으로 비교해요. 늦게 받는 동안 더 내는 돈이나 연금의 일부만 늦추는 방식은 계산하지 않아요. 5년 일찍 받기는 연금을 받기 전까지만 내므로 가입기간이 짧아질 수 있어요.</p>
+          <p>같은 연금액을 기준으로 5년 일찍 받으면 70%, 5년 늦게 받으면 136%예요. 실제 첫 지급월은 생일과 신청일 등에 따라 달라져요.</p>
+        </details>
+        <details>
+          <summary>태어난 해에 따라 받는 나이가 달라요</summary>
+          <ul class="np-age-list"><li>1952년까지 출생: 만 60세</li><li>1953~1956년 출생: 만 61세</li><li>1957~1960년 출생: 만 62세</li><li>1961~1964년 출생: 만 63세</li><li>1965~1968년 출생: 만 64세</li><li>1969년 이후 출생: 만 65세</li></ul>
+          <p>일찍 받기는 최대 5년 전, 늦게 받기는 최대 5년 후예요. 이미 정해진 나이가 됐거나, 과거로 돌아가 일찍 받는 경우는 이 도구에서 계산하지 않아요.</p>
+        </details>
+        <details>
+          <summary>더 자세히: 계산식과 공식 자료</summary>
+          <p>전체 가입자의 평균소득 A값, 내 평균소득 추정값 B, 가입기간을 함께 써요. 다만 이 계산기의 B는 보험료로 추정한 값이며, 과거 소득을 재평가한 법정 B값이 아니에요.</p>
+          <p>연도별로 가입한 개월 수에 다음 값을 곱해 모두 더한 뒤 2,880으로 나눠요. 가입기간이 120개월 이상일 때 적용해요.</p>
+          <ul class="np-formula-list"><li>1988~1998년: 2.4 × (A + 0.75 × B)</li><li>1999~2007년: 1.8 × (A + B)</li><li>2008~2025년: 2008년 1.5에서 해마다 0.015씩 낮춘 값 × (A + B). 2025년은 1.245예요.</li><li>2026년부터: 1.29 × (A + B)</li></ul>
+          <p>연금을 월 금액으로 바꾸는 과정과 가입기간에 따른 비율을 한 번씩만 반영한 식이에요. 일찍 받거나 늦게 받는 비율은 그다음에 적용해요.</p>
+          <ul class="np-sources"><li><a href="https://www.nps.or.kr/html/download/memberGuide_2.pdf" target="_blank" rel="noopener noreferrer">과거 소득 재평가 안내 ↗</a></li><li><a href="https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0103M0.do" target="_blank" rel="noopener noreferrer">예전 보험료율 ↗</a></li><li><a href="https://nps.or.kr/pnsinfo/ntpsklg/getOHAF0048M0.do?menuId=MN24001117&amp;tab=tab2" target="_blank" rel="noopener noreferrer">연금액 계산 기준 ↗</a></li><li><a href="https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0056M0.do" target="_blank" rel="noopener noreferrer">일찍 받기 · 제때 받기 · 늦게 받기 ↗</a></li><li><a href="https://www.nps.or.kr/comm/quick/getOHAH0011P0.do" target="_blank" rel="noopener noreferrer">A값과 예상연금월액표 ↗</a></li><li><a href="https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0038M0.do" target="_blank" rel="noopener noreferrer">보험료율 안내 ↗</a></li><li><a href="https://www.nps.or.kr/pnsgdnc/newgdnc/getOHAE0001M1.do?menuId=MN24000897&amp;pstId=ZZ202600000000000147" target="_blank" rel="noopener noreferrer">2026년 소득 범위 ↗</a></li><li><a href="https://www.law.go.kr/LSW/lsInfoP.do?ancYnChk=0&amp;lsId=001781" target="_blank" rel="noopener noreferrer">국민연금법: 연금액 최고한도 ↗</a></li></ul>
+          <p class="np-help">계산기 v0.3 · 공식 자료 확인일: <span id="rules-checked"></span><br>실제로 받을 수 있는지와 얼마를 받는지는 국민연금공단에서 확인해 주세요.</p>
+          <p><a href="./national-pension-calculator%20VR.0.1.html">이전 상세 계산기 VR.0.1 보기 →</a></p>
+        </details>
+      </section>
+    </section>
   </div>
-  <section class="np-method" aria-labelledby="method-title"><p class="np-kicker">METHOD & SOURCES</p><h2 id="method-title">계산의 범위와 공식 근거</h2><details><summary>어떤 산식을 쓰나요?</summary><p>연도별 개월수에 해당 연금 산정계수를 곱해 더합니다. 1988~1998년은 2.4×(A+0.75B), 1999~2007년은 1.8×(A+B), 2008년은 1.5에서 매년 0.015씩 감소하여 2025년 1.245, 2026년부터는 1.29×(A+B)입니다. 이 합을 <b>2,880</b>으로 나누면 정상 월액의 산식 결과가 됩니다(가입 120개월 이상). 연간 기본연금의 월 환산 및 10~20년 지급률·20년 초과 가산을 한 번만 반영한 동치식입니다.</p><p>이 모형의 B는 과거 보험료에서 역산한 명목 소득과 미래 소득을 전체 가입개월로 가중평균한 공통 추정값입니다. 재평가한 법정 B값이 아닙니다. 최고한도를 적용하지 않은 산식 결과를 표시하며, 실제 최고한도 확인에는 별도 소득자료가 필요합니다.</p></details><details><summary>과거 기록이 없으면 어떻게 추정하나요?</summary><p>알고 있는 연도별 개월·보험료를 전체 총합에서 먼저 빼고, 해당 연도의 남은 가입 가능 개월에서도 제외합니다. 나머지 개월은 기준월 직전부터 거꾸로 연속 배치하며, 나머지 총 보험료는 모르는 각 개월에 균등 배분합니다. 실제 공백·소득 변화와 다를 수 있습니다.</p><p>과거 보험료율은 사업장가입자 기준으로 1988~1992년 3%, 1993~1997년 6%, 1998~2025년 9%, 2026년 9.5%를 적용합니다. 지역가입자는 2005년 7월 이전 보험료율 경로가 달라 추정 오차가 커질 수 있습니다.</p></details><details><summary>미래 보험료·추가납부 계산의 한계</summary><p><b>현재 계산은 미래 보험료율 9.5% 고정</b>입니다. 실제 법은 2027~2033년 매년 0.5%p씩 올라 13%가 됩니다. 법정 인상 경로는 현재 결과에 반영하지 않습니다. 소득 상·하한은 2026.7~2027.6의 41만~659만원을 미래에도 고정하며 미래 실제 한도는 미정입니다.</p><p>추가액은 예정 개월수를 유지한 채 매월 같은 총 보험료를 높이는 수학적 역산입니다. 실제 소득과 가입자격이 뒷받침되어야 하며 원하는 금액을 임의로 더 내서 연금을 살 수 있다는 뜻이 아닙니다. 추후납부·반납·체납 납부의 가능 금액을 계산하지 않습니다.</p><p>모든 결과는 과거 소득 재평가·법정 연금액 최고한도·세금·건강보험료·소득활동 감액·크레딧·부양가족연금 적용 전입니다. 모형 안에서 목표를 넘더라도 실제 수급액이나 생활비 충족을 보장하지 않습니다.</p></details><details><summary>출생연도별 정상 수급연령</summary><p>1952년생까지 60세 · 1953~1956년생 61세 · 1957~1960년생 62세 · 1961~1964년생 63세 · 1965~1968년생 64세 · 1969년 이후 출생 65세. 조기는 최대 5년 전, 연기는 최대 5년 후입니다. 이미 정상 수급연령에 도달한 경우와 과거로 돌아가는 조기 청구는 이 도구가 지원하지 않습니다.</p></details><ul class="np-sources"><li><a href="https://www.nps.or.kr/html/download/memberGuide_2.pdf" target="_blank" rel="noopener noreferrer">국민연금공단 · 과거 소득 재평가 안내 ↗</a></li><li><a href="https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0103M0.do" target="_blank" rel="noopener noreferrer">국민연금공단 · 보험료율 변천 ↗</a></li><li><a href="https://nps.or.kr/pnsinfo/ntpsklg/getOHAF0048M0.do?menuId=MN24001117&tab=tab2" target="_blank" rel="noopener noreferrer">국민연금공단 · 급여 산정 기준 ↗</a></li><li><a href="https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0056M0.do" target="_blank" rel="noopener noreferrer">국민연금공단 · 노령·조기·연기연금 ↗</a></li><li><a href="https://www.nps.or.kr/comm/quick/getOHAH0011P0.do" target="_blank" rel="noopener noreferrer">국민연금공단 · A값과 예상연금월액표 ↗</a></li><li><a href="https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0038M0.do" target="_blank" rel="noopener noreferrer">국민연금공단 · 보험료율 ↗</a></li><li><a href="https://www.nps.or.kr/pnsgdnc/newgdnc/getOHAE0001M1.do?menuId=MN24000897&pstId=ZZ202600000000000147" target="_blank" rel="noopener noreferrer">국민연금공단 · 2026년 소득 상·하한 ↗</a></li><li><a href="https://www.law.go.kr/LSW/lsInfoP.do?ancYnChk=0&lsId=001781" target="_blank" rel="noopener noreferrer">국민연금법 · 제53조 연금액 최고한도 ↗</a></li></ul><p class="np-help">공식 자료 확인일: 2026.11.08. 계산 기준: 2026년 간편모형 v0.2. 과거 가입이력은 해당 표의 일괄 1.29가 아닌 연도별 계수로 계산합니다. 실제 수급권과 지급액은 국민연금공단에서 확인해 주세요.</p></section>
-</main><footer class="np-footer"><div class="np-shell"><a href="../index.html#my-finance">← 슬기로운금융생활로 돌아가기</a><p>WISEMONEY · 금융을 이해하는 작은 도구. 투자·연금 납부 권유가 아닙니다.</p></div></footer>
-</body></html>
+</main>
+<footer class="np-footer"><div class="np-shell"><a href="../index.html#my-finance">← 슬기로운금융생활로 돌아가기</a><p>WISEMONEY · 금융을 이해하는 작은 도구. 투자하거나 연금 보험료를 더 내라고 권하는 계산기가 아니에요.</p></div></footer>
+</body>
+</html>

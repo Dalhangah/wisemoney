@@ -13,3 +13,21 @@ body:has(#history-details) .np-history-row input{padding:8px 5px}
 body:has(#history-details) .np-eligibility{margin:0 0 22px;border-top:1px solid #ddd;padding-top:16px}
 body:has(#history-details) input[readonly]{background:#f4f4f4;color:#555}
 @media(max-width:360px){body:has(#history-details) .np-pair{grid-template-columns:minmax(0,1fr)}body:has(#history-details) .np-history-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px}body:has(#history-details) .np-history-row label:nth-child(3){grid-column:1 / 3}body:has(#history-details) .np-remove{grid-column:3;grid-row:2}}
+/* v0.3: keep the shared VR.0.1 styles unchanged; scope result guidance here. */
+.np-brief-notice{margin:18px 0 28px;font-size:12px;color:#666}
+#calculation-notes.np-result-method{margin:30px 0 0;padding-top:24px}
+#calculation-notes>h3{font-size:19px;letter-spacing:-.04em;margin-bottom:18px}
+#calculation-notes .np-a-basis{background:#fff6e7;padding:18px;margin-bottom:23px;border-left:3px solid #ff6600;font-size:12px}
+#calculation-notes .np-a-basis p+p{margin-top:10px}
+#calculation-notes .np-a-basis strong{font-size:15px}
+#calculation-notes .np-a-basis .np-help{margin-bottom:8px}
+#calculation-notes .np-a-basis a{font-size:11px;text-underline-offset:3px}
+#calculation-notes details{padding:15px 0}
+#calculation-notes summary{font-size:13px}
+#calculation-notes .np-sources{grid-template-columns:1fr;gap:8px;margin:16px 0}
+#calculation-notes .np-age-list,#calculation-notes .np-formula-list{padding-left:18px;font-size:12px;color:#555}
+#calculation-notes li+li{margin-top:5px}
+#calculation-notes .np-scenario-details{padding:17px 0;margin-top:0;line-height:1.85}
+#calculation-notes .np-scenario-details p{margin-top:10px}
+#calculation-notes .np-scenario-details ul{padding-left:18px}
+#results .np-result-summary .np-help{margin-bottom:0}

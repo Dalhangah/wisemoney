@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const e = require('../resource/js/national-pension-engine.js');
-const base = () => ({birth:'1985-06',asOf:'2026-11',pastMonths:130,pastPaid:35250000,futureMonths:240,premium:300000,A:3193511,targetMin:1500000,targetMax:2500000,earlyEligible:'yes',continueTo65:false,history:[]});
+const base = () => ({birth:'1985-06',asOf:'2026-11',pastMonths:130,pastPaid:35250000,futureMonths:240,premium:300000,targetMin:1500000,targetMax:2500000,earlyEligible:'yes',continueTo65:false,history:[]});
 const close = (a,b,tol=1e-6) => assert.ok(Math.abs(a-b)<tol, `${a} != ${b}`);
 const normal = x => e.calculate(x).rows[1];
 function conserved(x) {
@@ -44,7 +44,7 @@ test('all-known history computes income from each rate; row order is immaterial'
 test('unknown calendar allocation cannot exceed possible age or years',()=>{let x=base();x.birth='2008-01';x.pastMonths=11;assert.throws(()=>e.calculate(x),/가능한 기간/);x.pastMonths=10;assert.equal(conserved(x).allocated[0].estimatedMonths,10);x=base();x.history=[{year:2026,months:11,paid:100}];assert.throws(()=>e.calculate(x),/가입개월/);x.history=[{year:2000,months:1,paid:100}];assert.throws(()=>e.calculate(x),/가입개월/);x.history=[{year:2027,months:1,paid:100}];assert.throws(()=>e.calculate(x),/가입연도/);});
 test('random valid subset histories preserve totals and calendar capacity',()=>{let seed=91;const rand=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);for(let i=0;i<200;i++){const x=base();x.pastMonths=60+Math.floor(rand()*180);x.pastPaid=1000000+Math.floor(rand()*50000000);const known=1+Math.floor(rand()*9),paid=Math.floor(x.pastPaid*rand()*.8)+1;x.history=[{year:2026,months:known,paid}];conserved(x);}});
 test('period factor counted once at 119/120/240/241 month thresholds',()=>{for(const P of [0,119,120,121,239,240,241,360,480]){const B=3000000,A=3193511,c={pastMonths:P,pastIncomeSum:P*B,aWeight:P*1.29,bWeight:P*1.29},got=e.amount({A},c,[],0,1);if(P<120)assert.equal(got.eligible,false);else close(got.monthly,1.29*(A+B)*P/2880);}});
-test('legacy A plus 0.75B uses the same whole-career nominal proxy',()=>{const x=base();x.birth='1964-01';x.futureMonths=0;x.pastMonths=120;x.history=[{year:1988,months:12,paid:1080000},{year:1999,months:12,paid:3240000},...Array.from({length:8},(_,i)=>({year:2008+i,months:12,paid:3240000}))];x.pastPaid=x.history.reduce((s,r)=>s+r.paid,0);const c=e.validate(x),B=c.pastIncomeSum/120;close(B,3000000);close(normal(x).monthly,(x.A*c.aWeight+B*c.bWeight)/2880);});
+test('legacy A plus 0.75B uses the same whole-career nominal proxy',()=>{const x=base();x.birth='1964-01';x.futureMonths=0;x.pastMonths=120;x.history=[{year:1988,months:12,paid:1080000},{year:1999,months:12,paid:3240000},...Array.from({length:8},(_,i)=>({year:2008+i,months:12,paid:3240000}))];x.pastPaid=x.history.reduce((s,r)=>s+r.paid,0);const c=e.validate(x),B=c.pastIncomeSum/120;close(B,3000000);close(normal(x).monthly,(e.RULES.A*c.aWeight+B*c.bWeight)/2880);});
 test('changed premiums change nominal proxy; no revaluation or hidden income clamp',()=>{const a=base(),b=base();b.pastPaid*=2;assert.ok(normal(b).monthly>normal(a).monthly);const x=base();x.pastPaid=1000000000;x.futureMonths=0;assert.ok(conserved(x).proxyPastIncome>e.RULES.upper);assert.equal(conserved(x).highIncomeCaution,true);});
 test('legal cap is explicitly not computed from nominal proxy',()=>{const P=360,B=410000,A=3193511,r=e.amount({A},{pastMonths:P,pastIncomeSum:P*B,aWeight:P*1.29,bWeight:P*1.29},[],0,1);assert.ok(r.monthly>B);assert.equal(r.capCaution,true);close(r.monthly,1.29*(A+B)*P/2880);});
 test('normal/deferred same history; early contributions stop before own start',()=>{const x=base();x.continueTo65=true;x.futureMonths=360;const [a,n,d]=e.calculate(x).rows;assert.equal(n.futureMonths-a.futureMonths,60);assert.equal(n.futureMonths,d.futureMonths);close(d.monthly,n.monthly*1.36);assert.ok(a.monthly<n.monthly*.7);assert.equal(a.lastMonth,'2045-05');assert.equal(n.lastMonth,'2050-05');});
@@ -52,7 +52,7 @@ test('default contributions stop at 60',()=>{const [a,n,d]=e.calculate(base()).r
 test('early eligibility and already-past full five-year early date',()=>{for(const eligibility of ['unknown','no']){const x=base();x.earlyEligible=eligibility;assert.equal(e.calculate(x).rows[0].status,'income');}const x=base();x.birth='1965-01';assert.equal(e.calculate(x).rows[0].status,'past');x.birth='1967-11';assert.notEqual(e.calculate(x).rows[0].status,'past');});
 test('invalid dates, inconsistent totals and nonfinite numbers rejected',()=>{
   for(const s of ['2026-13','bad','2026-00'])assert.throws(()=>e.parseMonth(s));
-  for(const [key,value] of [['birth','1950-01'],['birth','2010-01'],['asOf','2027-01'],['A',NaN],['A',Infinity],['pastPaid',-1],['pastMonths',1.5],['futureMonths',.5],['premium',-1],['targetMax',0],['earlyEligible','maybe']]){const x=base();x[key]=value;assert.throws(()=>e.calculate(x),`${key}`);}
+  for(const [key,value] of [['birth','1950-01'],['birth','2010-01'],['asOf','2027-01'],['pastPaid',-1],['pastMonths',1.5],['futureMonths',.5],['premium',-1],['targetMax',0],['earlyEligible','maybe']]){const x=base();x[key]=value;assert.throws(()=>e.calculate(x),`${key}`);}
   for(const [months,paid] of [[0,1],[1,0]]){const x=base();x.pastMonths=months;x.pastPaid=paid;assert.throws(()=>e.calculate(x));}
   const x=base();x.premium=0;assert.throws(()=>e.calculate(x),/월 보험료/);
 });
@@ -61,3 +61,18 @@ test('conditional target solve roundtrips and cannot exceed modeled cap',()=>{co
 test('no future period, met targets, and tenure below 120 remain distinct',()=>{let x=base();x.futureMonths=0;x.targetMin=0;x.targetMax=1000000;let r=normal(x);assert.equal(r.targetMin.status,'met');assert.equal(r.targetMax.status,'no-months');x.pastMonths=119;r=normal(x);assert.equal(r.status,'tenure');assert.equal(r.missing,1);x.pastMonths=0;x.pastPaid=0;assert.equal(normal(x).status,'tenure');});
 test('4340 reference cells regress formula only under original constant-income assumptions',()=>{const rows=JSON.parse(fs.readFileSync(__dirname+'/reference-table.json','utf8'));assert.equal(rows.length,620);const years=[10,15,20,25,30,35,40];let count=0;for(const row of rows){const B=row.values[1];for(let i=0;i<years.length;i++){const P=years[i]*12,raw=e.amount({A:3193511},{pastMonths:P,pastIncomeSum:P*B,aWeight:P*1.29,bWeight:P*1.29},[],0,1).monthly;/* Fixture's constant-income legal cap is known here. App does NOT assume this for users. */assert.ok(Math.abs(Math.min(B,raw)-row.values[i+3])<10.01,`sheet row ${row.row}, ${years[i]} years`);count++;}}assert.equal(count,4340);});
 test('archive uses dedicated immutable assets and current page links encoded filename',()=>{const dir=__dirname+'/..',archive=fs.readFileSync(dir+'/app/national-pension-calculator VR.0.1.html','utf8'),live=fs.readFileSync(dir+'/app/national-pension-calculator.html','utf8');for(const file of ['national-pension-engine-vr01.js','national-pension-ui-vr01.js','national-pension-vr01.css']){assert.ok(archive.includes(file));assert.ok(fs.existsSync(dir+'/resource/'+(file.endsWith('.css')?'css':'js')+'/'+file));}assert.ok(live.includes('national-pension-calculator%20VR.0.1.html'));assert.ok(!live.includes('id="pastB"'));assert.ok(!live.includes('id="premiumBasis"'));});
+
+test('developer-set A is mandatory internally and cannot be overridden by form data',()=>{const x=base(),expected=normal(x);for(const A of [1,99999999,NaN,Infinity,undefined]){x.A=A;const actual=normal(x);close(actual.monthly,expected.monthly);assert.deepEqual(actual.targetMin,expected.targetMin);assert.deepEqual(actual.targetMax,expected.targetMax);}assert.equal(e.RULES.A,3193511);assert.equal(e.RULES.AYear,2026);assert.ok(Object.isFrozen(e.RULES));assert.equal(e.RULES.ASource,'https://www.nps.or.kr/comm/quick/getOHAH0011P0.do');});
+test('UI has four input groups, no A input, and A explanation follows results',()=>{
+ const html=fs.readFileSync(__dirname+'/../app/national-pension-calculator.html','utf8');
+ const ui=fs.readFileSync(__dirname+'/../resource/js/national-pension-ui.js','utf8');
+ assert.equal((html.match(/<fieldset>/g)||[]).length,4);
+ assert.ok(!html.includes('id="A"'));
+ assert.ok(!ui.includes("$('A')"));
+ assert.ok(html.indexOf('id="calculation-notes"')>html.indexOf('id="results"'));
+ assert.match(html,/id="calculation-notes"[^>]*hidden/);
+ for(const key of ['A','AYear','APeriod','ASource','APeriodSource'])assert.ok(ui.includes('NationalPension.RULES.'+key));
+ assert.ok(html.includes('aria-describedby="birth-help age-hint"'));
+ assert.ok(html.includes('id="form-error" class="np-error" role="alert"'));
+ assert.ok(html.includes('v03'));
+});

@@ -1,14 +1,14 @@
-# 국민연금 간편 시나리오 계산기 v0.2
+# 국민연금 간편 계산기 v0.3
 
-Public entry: `app/national-pension-calculator.html`. This document describes the implemented v0.2 model, not an official NPS quotation. The previous methodology is preserved in `docs/national-pension-methodology-vr01.md`; the previous page is `app/national-pension-calculator VR.0.1.html`.
+Public entry: `app/national-pension-calculator.html`. This document describes the implemented v0.3 model, not an official NPS quotation. The previous methodology is preserved in `docs/national-pension-methodology-vr01.md`; the previous page is `app/national-pension-calculator VR.0.1.html`.
 
 ## Purpose and input basis
 
-The main inputs are birth month, aggregate past insured months and paid premiums, future contribution months and fixed monthly premium, A, and minimum/maximum monthly living-cost targets. **All premiums are total insurance premiums including the employer share.** Employee-only amounts are not automatically doubled. The UI fixes the baseline at November 2026: past history ends in October, future contributions start in November. The engine accepts July–December 2026 for its supported 2026 rules, but the UI does not expose a baseline selector.
+The main inputs are birth month, aggregate past insured months and paid premiums, future contribution months and fixed monthly premium, and minimum/maximum monthly living-cost targets. **All premiums are total insurance premiums including the employer share.** Employee-only amounts are not automatically doubled. The UI fixes the baseline at November 2026: past history ends in October, future contributions start in November. The engine accepts July–December 2026 for its supported 2026 rules, but the UI does not expose a baseline selector.
 
 The optional yearly history consists of year, insured months, and total premiums for that year. These are **subsets of the aggregate past totals, never additional contributions**. Optional post-60 continuation defaults to false; early-income eligibility defaults to unknown. No externally supplied past B is required.
 
-A defaults to KRW 3,193,511, the published basis for benefit-trigger dates December 2025–November 2026. It represents the applicable average across all insured people, not the individual's income. Future A remains unknown; the entered A is held fixed.
+A is a developer-maintained constant, KRW 3,193,511 for 2026, verified on 2026-11-08. The UI has no A field; the engine uses frozen RULES.A and ignores any caller-supplied input.A. The NPS simple calculator labels this the 2026 applied A; its benefit-calculation guide specifies benefit-trigger dates December 2025–November 2026 (지급사유 발생 기준), not a blanket claim about all payments in those months. A is a common value derived from whole-system participants’ average monthly incomes over the recent three years, not the user's salary or the actual average salary earned during 2026. Future A remains unknown; the current published value is held fixed for this illustration. Amount, year, applicability description, source URLs and verification date live together in RULES. Update them together after checking new official NPS data.
 
 ## Conserving totals and reconstructing missing history
 
@@ -33,7 +33,7 @@ For each historical year, total premiums divided by the assumed total premium ra
 
 Regional insurance had a different rate path before July 2005. The engine conservatively sets `earlyRateCaution` for any allocated year up to and including 2005; annual data alone cannot determine which part of 2005 is represented. The workplace assumption can materially distort reconstructed income for regional or other differing histories. Past income is not clamped to the current 2026 income bounds.
 
-**The reconstructed historical income is nominal, unrevalued, and only a proxy. It is not statutory revalued B and is not expressed in 2026 purchasing power.** The model does not repair that limitation by silently assuming a revaluation factor or claiming all historical money has a common purchasing-power basis. Future income and the entered A/targets are held fixed numerically. Living-cost gaps are therefore illustrative amount comparisons, not purchasing-power or future affordability forecasts.
+**The reconstructed historical income is nominal, unrevalued, and only a proxy. It is not statutory revalued B and is not expressed in 2026 purchasing power.** The model does not repair that limitation by silently assuming a revaluation factor or claiming all historical money has a common purchasing-power basis. Future income, the fixed published A and entered targets are held fixed numerically. Living-cost gaps are therefore illustrative amount comparisons, not purchasing-power or future affordability forecasts.
 
 ## Formula and shared career proxy
 
@@ -52,7 +52,7 @@ The 2,880 denominator combines the annual-to-monthly conversion and the 10–20-
 
 The active engine fixes the future total insurance rate at **9.5% for every modeled future month**. Future monthly income is the entered fixed total premium divided by 0.095. The model fixes standard monthly income bounds at KRW 410,000–6,590,000, the July 2026–June 2027 limits. Consequently, where future contributions are present, the modeled fixed total monthly premium range is KRW 38,950–626,050. Actual future income bounds are unknown.
 
-Actual enacted rates rise to 10% in 2027, 10.5% in 2028, 11% in 2029, 11.5% in 2030, 12% in 2031, 12.5% in 2032, and 13% from 2033. **This schedule is not active in v0.2.** It appears only as a commented future-update roadmap in the engine. Any future activation must coordinate visible assumptions, income bounds, supported input dates and tests; the comment does not change current outputs.
+Actual enacted rates rise to 10% in 2027, 10.5% in 2028, 11% in 2029, 11.5% in 2030, 12% in 2031, 12.5% in 2032, and 13% from 2033. **This schedule is not active in v0.3.** It appears only as a commented future-update roadmap in the engine. Any future activation must coordinate visible assumptions, income bounds, supported input dates and tests; the comment does not change current outputs.
 
 ## Timing, eligibility and scenario comparisons
 
@@ -68,11 +68,11 @@ Actual enacted rates rise to 10% in 2027, 10.5% in 2028, 11% in 2029, 11.5% in 2
 
 All displayed formula amounts, gaps and reverse solutions are **before statutory income revaluation and the actual legal pension cap**, as well as tax, health-insurance charges, earnings-related pension reductions, credits, dependents' supplement, and special eligibility cases.
 
-The actual Article 53 cap needs additional data, including the relevant revalued income records. v0.2 does not pretend the nominal proxy B establishes that cap. A heuristic `capCaution` is raised when the larger of the unadjusted formula amount and scenario-adjusted amount exceeds proxy B. It is only a prompt to check the real cap, not a legal cap test. A false flag does not prove no cap applies. Unlike v0.1, this flag does not block outputs or reverse solutions; all remain explicitly uncapped illustrations.
+The actual Article 53 cap needs additional data, including the relevant revalued income records. v0.3 does not pretend the nominal proxy B establishes that cap. A heuristic `capCaution` is raised when the larger of the unadjusted formula amount and scenario-adjusted amount exceeds proxy B. It is only a prompt to check the real cap, not a legal cap test. A false flag does not prove no cap applies. Unlike v0.1, this flag does not block outputs or reverse solutions; all remain explicitly uncapped illustrations.
 
 ## Conditional reverse calculation
 
-The section is titled “이 단순모형에서 필요한 추가 납입 추정”. It holds the valid future contribution months unchanged and solves for a higher constant **total** monthly premium within the frozen income bounds. The engine uses a bounded numerical search. No user data is sent elsewhere to obtain a solution.
+The section is titled “생활비 목표에 맞추려면 얼마를 더 내야 할까?”. It holds the valid future contribution months unchanged and solves for a higher constant **total** monthly premium within the frozen income bounds. The engine uses a bounded numerical search. No user data is sent elsewhere to obtain a solution.
 
 - `met`: the current uncapped model amount already meets the target; modeled extra premium is zero.
 - `possible`: a premium within the model ceiling reaches the target; show required total monthly premium, incremental monthly premium, and total incremental premiums over the same future months.
@@ -104,3 +104,9 @@ Calculation inputs remain in the browser and are not stored or transmitted by th
 Independent read-only review found no financial implementation blocker for the prominently disclosed simplified model. A plausibility warning was added when an inferred annual monthly income exceeds even the 2026 income ceiling; historical income is not silently clamped. The 2005 caution is conditional because annual records do not identify the half-year.
 
 Browser QA passed aggregate-only entry, demo, optional eligibility, annual months and amount overages, duplicate years, stale-result removal, reset, archived navigation and archived demo. Desktop and actual 390px/320px iframe viewports were inspected; body content does not overflow, and the comparison table scrolls internally. These were browser viewport checks, not a real-device Safari test.
+
+## v0.3 presentation update
+
+A is no longer a user input. Four input groups cover birth date, past payments, future payments and living-cost targets. Detailed cautions and calculation assumptions appear below the output, with a short “reference amount, actual payment may differ” note next to the table. The fixed A amount, year, meaning and official source appear below the results. Input validation, total-premium/subset instructions, optional eligibility controls and status-specific blockers remain available where needed. Wording uses plain Korean without changing the meaning of money, eligibility or legal limitations. VR.0.1 and all its versioned assets remain untouched.
+
+v0.3 verification: all 45 tests passed (26 current and 19 archived). The fixed-A test proves arbitrary caller A values cannot change pension amounts or either reverse solution. A further 300 randomized cases were compared against the previously published v0.2 engine with the same A; all monthly amounts, statuses and target solutions were identical. Independent review checked official A sources, fixed-value usage, UI bindings and accessibility structure. Browser QA checked no A input, A=3,193,511 displayed beneath results, applicability/source text, simple entry, repeated calculation, early eligibility, invalid totals, reset and stale-note hiding. Desktop and 390px/320px iframe widths passed with no body overflow; tables retain internal horizontal scrolling. Archive navigation and return links work. This is not a real-device Safari test.

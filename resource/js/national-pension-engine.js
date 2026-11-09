@@ -4,9 +4,9 @@
   else root.NationalPension = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  const RULES = Object.freeze({ version:'0.2', checked:'2026-11-09', A:3193511, lower:410000, upper:6590000, futureRate:0.095 });
+  const RULES = Object.freeze({ version:'0.3', checked:'2026-11-08', A:3193511, AYear:2026, APeriod:'2025년 12월~2026년 11월에 연금을 받을 사유가 생긴 경우', ASource:'https://www.nps.or.kr/comm/quick/getOHAH0011P0.do', APeriodSource:'https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0048M0.do', lower:410000, upper:6590000, futureRate:0.095 });
   const ym = (year, month) => year * 12 + month - 1;
-  const parseMonth = value => { const m = /^(\d{4})-(\d{2})$/.exec(value || ''); if (!m || +m[2] < 1 || +m[2] > 12) throw Error('연월을 올바르게 입력해 주세요.'); return ym(+m[1], +m[2]); };
+  const parseMonth = value => { const m = /^(\d{4})-(\d{2})$/.exec(value || ''); if (!m || +m[2] < 1 || +m[2] > 12) throw Error('연도와 월을 다시 입력해 주세요.'); return ym(+m[1], +m[2]); };
   const monthText = n => `${Math.floor(n / 12)}-${String(n % 12 + 1).padStart(2, '0')}`;
   const normalAge = y => y <= 1952 ? 60 : y <= 1956 ? 61 : y <= 1960 ? 62 : y <= 1964 ? 63 : y <= 1968 ? 64 : 65;
   const coeff = y => y <= 1998 ? [2.4,1.8] : y <= 2007 ? [1.8,1.8] : y <= 2025 ? [1.5-0.015*(y-2008),1.5-0.015*(y-2008)] : [1.29,1.29];
@@ -31,16 +31,16 @@
       finite(row.year,'가입연도',1988,Math.floor(c.now/12),true);
       finite(row.months,'연도별 개월',1,12,true);
       finite(row.paid,'연도별 합산 납부액',1,10000000000);
-      if(annual.has(row.year)) throw Error(`${row.year}년이 중복되었습니다. 같은 해의 이력은 한 줄로 합쳐 주세요.`);
-      if(row.months>capacity(row.year,c)) throw Error(`${row.year}년 가입개월이 생년월·기준월과 맞지 않습니다. 기준월 이후 또는 만 18세 미만 특례 기간은 지원하지 않습니다.`);
+      if(annual.has(row.year)) throw Error(`${row.year}년이 중복되었습니다. 같은 해의 기록은 한 줄로 합쳐 주세요.`);
+      if(row.months>capacity(row.year,c)) throw Error(`${row.year}년 가입개월이 생년월이나 계산 날짜와 맞지 않습니다. 아직 지나지 않은 달이나 만 18세 전 납부는 이 계산기에서 다루지 않습니다.`);
       annual.set(row.year,{year:row.year,knownMonths:row.months,knownPaid:row.paid,estimatedMonths:0,estimatedPaid:0,rate:historicalRate(row.year)});
       explicitMonths+=row.months; explicitPaid+=row.paid;
     }
     const remainingMonths=input.pastMonths-explicitMonths,remainingPaid=input.pastPaid-explicitPaid;
-    if(remainingMonths<0) throw Error('연도별 가입개월의 합계가 전체 가입개월을 초과합니다. 상세 입력은 전체의 일부입니다.');
-    if(remainingPaid<0) throw Error('연도별 납부액의 합계가 전체 납부총액을 초과합니다. 상세 입력은 전체의 일부입니다.');
-    if(remainingMonths===0&&remainingPaid!==0) throw Error('연도별 개월이 전체와 같으면 연도별 금액도 전체 납부총액과 같아야 합니다.');
-    if(remainingMonths>0&&remainingPaid<=0) throw Error('미입력 가입개월이 남았지만 남은 납부액이 없습니다. 전체·상세 입력을 확인해 주세요. 크레딧은 이 모형에서 제외합니다.');
+    if(remainingMonths<0) throw Error('연도별 가입개월의 합계가 전체 가입개월보다 많습니다. 연도별 기록은 전체 안에 들어 있는 기록입니다.');
+    if(remainingPaid<0) throw Error('연도별 납부액의 합계가 전체 낸 돈보다 많습니다. 연도별 기록은 전체 안에 들어 있는 기록입니다.');
+    if(remainingMonths===0&&remainingPaid!==0) throw Error('연도별 개월이 전체와 같으면, 연도별 금액도 전체 낸 돈과 같아야 합니다.');
+    if(remainingMonths>0&&remainingPaid<=0) throw Error('아직 나누지 않은 개월은 남았지만 남은 납부액이 없습니다. 전체와 연도별 기록을 확인해 주세요. 출산·군복무 등으로 더해지는 가입기간은 계산하지 않습니다.');
     // Unknown timing is a FICTIONAL latest-backwards allocation, not recovered history.
     // Explicit months reserve calendar slots first; amounts and months are never added twice.
     let unallocated=remainingMonths;
@@ -49,7 +49,7 @@
       const n=Math.min(unallocated,capacity(year,c)-row.knownMonths);
       if(n>0) { row.estimatedMonths=n; row.estimatedPaid=remainingPaid*n/remainingMonths; annual.set(year,row); unallocated-=n; }
     }
-    if(unallocated>0) throw Error('전체 가입개월이 생년월·기준월상 가능한 기간보다 많습니다. 만 18세 미만 특례·크레딧은 별도 확인해 주세요.');
+    if(unallocated>0) throw Error('전체 가입개월이 나이와 계산 날짜로 볼 때 가능한 기간보다 많습니다. 만 18세 전 납부나 출산·군복무로 더해진 기간은 공단에 따로 확인해 주세요.');
     const allocated=[...annual.values()].sort((a,b)=>a.year-b.year);
     let pastIncomeSum=0,aWeight=0,bWeight=0;
     for(const row of allocated) {
@@ -62,16 +62,16 @@
   }
   function validate(input) {
     const now=parseMonth(input.asOf),birth=parseMonth(input.birth),birthYear=Math.floor(birth/12);
-    if(now<ym(2026,7)||now>=ym(2027,1)) throw Error('이 간편 버전의 계산 기준월은 2026년 7~12월만 지원합니다. 2027년 이후 규칙은 아직 활성화하지 않았습니다.');
-    if(birth>=now||now-birth<18*12) throw Error('만 18세 이상 계획만 지원합니다.');
+    if(now<ym(2026,7)||now>=ym(2027,1)) throw Error('이 계산기는 2026년 7~12월을 시작점으로 쓸 수 있습니다. 2027년 이후를 시작점으로 하는 계산은 아직 지원하지 않습니다.');
+    if(birth>=now||now-birth<18*12) throw Error('만 18세 이상인 사람만 계산할 수 있습니다.');
     const age=normalAge(birthYear),normal=birth+age*12;
-    if(now>=normal) throw Error('이미 정상 수급연령에 도달한 경우는 공단의 개별 조회가 필요합니다. 이 도구는 수급 전 계획용입니다.');
-    finite(input.A,'A값',1,100000000); finite(input.pastPaid,'전체 납부총액',0,10000000000);
+    if(now>=normal) throw Error('이미 정상 수급연령(연금을 받는 나이)이 되었다면 국민연금공단에서 확인해 주세요. 이 계산기는 그 나이가 되기 전의 계획용입니다.');
+    finite(input.pastPaid,'전체 납부총액',0,10000000000);
     finite(input.pastMonths,'전체 가입개월',0,600,true); finite(input.futureMonths,'앞으로 납부할 개월',0,600,true);
     finite(input.premium,'전체 월 보험료',0,10000000); finite(input.targetMin,'최소 생활비',0,100000000); finite(input.targetMax,'최대 생활비',input.targetMin,100000000);
-    if(!['yes','no','unknown'].includes(input.earlyEligible)) throw Error('조기연금 소득요건을 선택해 주세요.');
-    if((input.pastMonths===0)!==(input.pastPaid===0)) throw Error('기납부 이력이 없으면 가입개월과 납부총액 모두 0으로, 이력이 있으면 모두 양수로 입력해 주세요.');
-    if(input.futureMonths&&!input.premium) throw Error('납부 예정 기간이 있으면 월 보험료를 입력해 주세요.');
+    if(!['yes','no','unknown'].includes(input.earlyEligible)) throw Error('일찍 받기 위한 소득 조건을 선택해 주세요.');
+    if((input.pastMonths===0)!==(input.pastPaid===0)) throw Error('낸 적이 없다면 가입개월과 낸 돈을 모두 0으로 적어 주세요. 낸 적이 있다면 둘 다 0보다 커야 합니다.');
+    if(input.futureMonths&&!input.premium) throw Error('앞으로 낼 기간을 적었다면 월 보험료도 적어 주세요.');
     const c={now,birth,age,normal,pastMonths:input.pastMonths};
     c.historyAnalysis=reconstructHistory(input,c); c.pastIncomeSum=c.historyAnalysis.pastIncomeSum;c.aWeight=c.historyAnalysis.aWeight;c.bWeight=c.historyAnalysis.bWeight;
     return c;
@@ -86,7 +86,7 @@
     const p=c.pastMonths+months.length;
     if(p<120) return {eligible:false,months:p,missing:120-p};
     const incomeSum=months.reduce((sum,m)=>sum+totalPremium/m.rate,0),B=(c.pastIncomeSum+incomeSum)/p;
-    const normalBeforeCap=(input.A*(c.aWeight+1.29*months.length)+B*(c.bWeight+1.29*months.length))/2880;
+    const normalBeforeCap=(RULES.A*(c.aWeight+1.29*months.length)+B*(c.bWeight+1.29*months.length))/2880;
     // B is a NOMINAL INCOME PROXY, not statutory revalued B. Never assert the legal cap.
     // All amounts are pre-revaluation / pre-cap illustrations only.
     return {eligible:true,months:p,B,normalBeforeCap,monthly:normalBeforeCap*multiplier,capCaution:Math.max(normalBeforeCap,normalBeforeCap*multiplier)>B};
@@ -103,7 +103,7 @@
   }
   function calculate(input) {
     const c=validate(input),normalMonths=schedule(input,c,c.normal),totalPremium=input.premium;
-    const specs=[{key:'early',label:'5년 조기',claim:c.normal-60,multiplier:0.7},{key:'normal',label:'정상 수령',claim:c.normal,multiplier:1},{key:'deferred',label:'5년 연기',claim:c.normal+60,multiplier:1.36}];
+    const specs=[{key:'early',label:'5년 일찍 받기',claim:c.normal-60,multiplier:0.7},{key:'normal',label:'정해진 나이에 받기',claim:c.normal,multiplier:1},{key:'deferred',label:'5년 늦게 받기',claim:c.normal+60,multiplier:1.36}];
     const rows=specs.map(spec=>{
       if(spec.claim<c.now&&spec.key==='early')return {...spec,status:'past'};
       if(spec.key==='early'&&input.earlyEligible!=='yes')return {...spec,status:'income'};
